@@ -1,0 +1,4 @@
+FROM mongo:7.0
+COPY replica-init.js /docker-entrypoint-initdb.d/replica-init.js
+CMD [ "--bind_ip_all", "--replSet", "rs0" ]
+

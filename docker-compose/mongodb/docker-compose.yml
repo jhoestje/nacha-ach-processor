@@ -1,0 +1,47 @@
+services:
+  nacha-processor-db:
+    image: mongo:7.0
+    container_name: nacha-processor-db
+    # command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    command: ["--bind_ip_all", "--replSet", "rs0"]
+    environment:
+      # - MONGO_INITDB_ROOT_USERNAME=root
+      # - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+      - MONGO_INITDB_DATABASE=nachadb
+      - MONGO_REPLICA_SET_NAME=rs0
+    ports:
+      - 27017:27017
+    # volumes:
+    #   - mongodb_data_container:/data/db
+    volumes:
+        - ./replica-init.js:/docker-entrypoint-initdb.d/replica-init.js:ro
+    healthcheck:
+        test: test $$(echo "rs.initiate({'_id':'rs0','members':[{'_id':0,'host':'localhost:27017'}]}).ok || rs.status().ok" | mongo -u root -p rootpassword --quiet) -eq 1
+        interval: 10s
+        start_period: 30s
+
+# volumes:
+#   mongodb_data_container:
+
+
+# version: '3.7'
+
+# services:
+#   assethealthdatam-db:
+#       image: mongo:4.2-bionic
+#       container_name: assethealthdatam-db
+#       environment:
+#         - MONGO_INITDB_ROOT_USERNAME=root
+#         - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+#         - MONGO_INITDB_DATABASE=assethealthdatam
+#         - MONGO_REPLICA_SET_NAME=rs0
+#       ports:
+#         - '27017:27017'
+#       volumes:
+#         - ./replica-init.js:/docker-entrypoint-initdb.d/replica-init.js:ro
+#       healthcheck:
+#         test: test $$(echo "rs.initiate({'_id':'rs0','members':[{'_id':0,'host':'localhost:27017'}]}).ok || rs.status().ok" | mongo -u root -p rootpassword --quiet) -eq 1
+#         interval: 10s
+#         start_period: 30s
+#       command: ["--bind_ip_all", "--replSet", "rs0"]
+

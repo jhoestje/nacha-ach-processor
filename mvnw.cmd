@@ -147,3 +147,18 @@ try {
 }
 
 Write-Output "MVN_CMD=$MAVEN_HOME/bin/$MVN_CMD"
+
+set STACK_MONGO_CONTAINER_NAME=nacha-processor-db
+
+for /f %%i in ('docker inspect --format="{{.State.Running}}" %STACK_MONGO_CONTAINER_NAME% 2^>nul') do set stack_container_status=%%i
+
+if "%test_container_status%"=="true" (
+		echo The container "%STACK_MONGO_CONTAINER_NAME%" is running.
+	) else (
+		echo The container "%STACK_MONGO_CONTAINER_NAME%" is not running.
+		echo Starting MongoDB ...
+		REM Pushd %MONGO_DIR%
+		START /min "MongoDB" /D %MONGO_DIR% PowerShell -NoExit -NoProfile -ExecutionPolicy Bypass -Command "[System.Console]::Title = 'MongoDB'; docker compose -f docker-compose.yml up"
+		popd
+		timeout 20 >nul
+	)
