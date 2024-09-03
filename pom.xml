@@ -8,11 +8,11 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.bmcd.asset.health</groupId>
+	<groupId>org.johoco.nacha</groupId>
 	<artifactId>nacha-ach-processor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>nacha-ach-processor2</name>
-	<description>Eureka project for AssetHealth</description>
+	<name>nacha-ach-processor</name>
+	<description>Nacha ACH file processor</description>
 	<url/>
 	<licenses>
 		<license/>
