@@ -34,8 +34,6 @@ public class FileWatcherConfig {
                 Duration.ofSeconds(watcherProperties.getQuietPeriod()));
         watcher.addListener(fileChangeListener);
         watcher.addSourceDirectory(Path.of(watcherProperties.getDirectory()).toFile());
-//        fileSystemWatcher.addListener(new CustomerAddFileChangeListener(fileProcessor));
-//        fileSystemWatcher.setTriggerFilter(f -> f.toPath().endsWith(".csv"));
         watcher.start();
         LOG.info(String.format("FileSystemWatcher start: %s", watcherProperties.getDirectory()));
 

@@ -2,7 +2,9 @@ package org.johoco.nacha.file.listener;
 
 import java.util.Set;
 
+import org.johoco.nacha.file.processor.AchFileProcessor;
 import org.springframework.boot.devtools.filewatch.ChangedFile;
+import org.springframework.boot.devtools.filewatch.ChangedFile.Type;
 import org.springframework.boot.devtools.filewatch.ChangedFiles;
 import org.springframework.boot.devtools.filewatch.FileChangeListener;
 import org.springframework.stereotype.Component;
@@ -10,17 +12,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class AchFileChangeListener implements FileChangeListener {
 
-    public AchFileChangeListener() {
-        // TODO Auto-generated constructor stub
+    private AchFileProcessor fileProcessor;
+
+    public AchFileChangeListener(final AchFileProcessor fileProcessor) {
+        this.fileProcessor = fileProcessor;
     }
 
     @Override
     public void onChange(Set<ChangedFiles> changeSet) {
-        for (ChangedFiles cfiles : changeSet) {
-            for (ChangedFile cfile : cfiles.getFiles()) {
-                System.out.println(cfile.getType() + ":" + cfile.getFile().getName());
+        for (ChangedFiles files : changeSet) {
+            for (ChangedFile cf : files.getFiles()) {
+                System.out.println(cf.getType() + ":" + cf.getFile().getName());
+                if (Type.ADD.equals(cf.getType()))
+                    fileProcessor.process(cf.getFile());
             }
         }
     }
-
 }
