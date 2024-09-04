@@ -28,12 +28,12 @@ private AchFileLogRepository requestRepository;
         requestRepository.save(request);
         
         
-        try (BufferedReader reader = new BufferedReader(new FileReader("path/to/ach/file.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(achFile.getAbsolutePath()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String recordType = line.substring(0, 1);
-                AchRecordType t = AchRecordType.valueOf(recordType);
-                switch (t) {
+                String recordTypeValue = line.substring(0, 1);
+                AchRecordType recordType = AchRecordType.valueOf(recordTypeValue);
+                switch (recordType) {
                     case FILE_HEADER_RECORD:
                         AchHeader header = AchFileLineParser.parseHeader(line);
                         // Process header
@@ -43,8 +43,14 @@ private AchFileLogRepository requestRepository;
                         AchEntryDetail entryDetail = AchFileLineParser.parseEntryDetail(line);
                         // Process entry detail
                         break;
-
-                    // Handle other record types
+                case ADDENDUM:
+                    break;
+                case BATCH_CONTROL_TOTAL:
+                    break;
+                case BATCH_HEADER_RECORD:
+                    break;
+                case FILE_CONTROL_RECORD:
+                    break;
                 }
             }
         } catch (IOException e) {
