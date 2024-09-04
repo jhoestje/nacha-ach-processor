@@ -3,4 +3,12 @@ spring:
     name: nacha-ach-processor
   data:
     mongodb:
-      database: 
+      database: nachadb
+        
+application:
+  fileWatcher:
+    daemon: true
+    pollInterval: 5
+    quietPeriod: 2
+    directory: c:\\workspace\\ach
+    
