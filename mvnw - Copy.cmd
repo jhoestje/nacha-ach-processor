@@ -50,6 +50,53 @@ if ($env:MVNW_VERBOSE -eq "true") {
   $VerbosePreference = "Continue"
 }
 
+try {
+Write-Host "Starting MongoDBss ..."
+
+# Set environment variable
+$env:STACK_MONGO_CONTAINER_NAME = "nacha-processor-db"
+
+# Check if the container is running
+$stack_container_status = docker inspect --format "{{.State.Running}}" $env:STACK_MONGO_CONTAINER_NAME 2>$null
+
+if ($stack_container_status -eq "true") {
+    Write-Host "Container $env:STACK_MONGO_CONTAINER_NAME is running"
+} else {
+    Write-Host "Container $env:STACK_MONGO_CONTAINER_NAME is not running"
+    Write-Host "Starting MongoDB ..."
+
+    # Change to the MongoDB directory (if needed)
+    Push-Location $env:MONGO_DIR
+
+    # Start MongoDB using docker-compose
+    docker-compose -f docker-compose.yml up -d
+
+    # Return to the previous directory
+    Pop-Location
+
+    # Wait for 20 seconds
+    Start-Sleep -Seconds 20
+}
+
+# Assuming test_container_status logic is needed, adapt it similarly
+if ($test_container_status -eq "true") {
+    Write-Host "The container $env:STACK_MONGO_CONTAINER_NAME is running."
+} else {
+    Write-Host "The container $env:STACK_MONGO_CONTAINER_NAME is not running."
+    Write-Host "Starting MongoDB ..."
+
+    # Start MongoDB (same logic as above)
+    Push-Location $env:MONGO_DIR
+    docker-compose -f docker-compose.yml up -d
+    Pop-Location
+
+    # Sleep for 20 seconds
+    Start-Sleep -Seconds 20
+}
+} catch {
+Write-Error "Cannot start docker container"
+}
+
 # calculate distributionUrl, requires .mvn/wrapper/maven-wrapper.properties
 $distributionUrl = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionUrl
 if (!$distributionUrl) {

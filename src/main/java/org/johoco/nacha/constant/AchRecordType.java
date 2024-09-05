@@ -12,7 +12,7 @@ public enum AchRecordType {
     ADDENDUM("7"),
     BATCH_CONTROL_TOTAL("8"),
     FILE_CONTROL_RECORD("9");
-
+//999 file padding
     private String recordType;
     
     AchRecordType(final String recordType) {
