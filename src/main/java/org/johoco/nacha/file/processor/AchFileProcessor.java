@@ -12,7 +12,7 @@ import org.johoco.nacha.domain.AchBatchHeaderRecord;
 import org.johoco.nacha.domain.AchEntryDetail;
 import org.johoco.nacha.domain.AchFileControlRecord;
 import org.johoco.nacha.domain.AchFileLog;
-import org.johoco.nacha.domain.AchHeader;
+import org.johoco.nacha.domain.AchFileHeader;
 import org.johoco.nacha.parser.AchFileLineParser;
 import org.johoco.nacha.repository.AchFileLogRepository;
 import org.springframework.stereotype.Component;
@@ -35,10 +35,10 @@ public class AchFileProcessor {
             String line;
             while ((line = reader.readLine()) != null) {
                 String recordTypeValue = line.substring(0, 1);
-                AchRecordType recordType = AchRecordType.valueOf(recordTypeValue);
+                AchRecordType recordType = AchRecordType.recordTypeOf(recordTypeValue);
                 switch (recordType) {
                 case FILE_HEADER_RECORD:
-                    AchHeader header = AchFileLineParser.parseHeader(line);
+                    AchFileHeader header = AchFileLineParser.parseFileHeader(line);
                     break;
                 case ENTRY_DETAIL_RECORD:
                     AchEntryDetail entryDetail = AchFileLineParser.parseEntryDetail(line);
@@ -47,7 +47,7 @@ public class AchFileProcessor {
                     AchAddendum addendum = AchFileLineParser.parseAddendum(line);
                     break;
                 case BATCH_CONTROL_TOTAL:
-                    AchBatchControlRecord controlTotal = AchFileLineParser.parseBatchControlTotal(line);
+                    AchBatchControlRecord controlTotal = AchFileLineParser.parseBatchControlRecord(line);
                     break;
                 case BATCH_HEADER_RECORD:
                     AchBatchHeaderRecord headerRecord = AchFileLineParser.parseBatchHeaderRecord(line);
@@ -57,7 +57,7 @@ public class AchFileProcessor {
                     break;
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -1,5 +1,8 @@
 package org.johoco.nacha.parser;
 
+import org.johoco.nacha.constant.AddendumFixedWidth;
+import org.johoco.nacha.constant.BatchControlFixedWidth;
+import org.johoco.nacha.constant.BatchHeaderFixedWidth;
 import org.johoco.nacha.constant.EntryDetailFixedWidth;
 import org.johoco.nacha.constant.FileHeaderFixedWidth;
 import org.johoco.nacha.domain.AchAddendum;
@@ -7,81 +10,86 @@ import org.johoco.nacha.domain.AchBatchControlRecord;
 import org.johoco.nacha.domain.AchBatchHeaderRecord;
 import org.johoco.nacha.domain.AchEntryDetail;
 import org.johoco.nacha.domain.AchFileControlRecord;
-import org.johoco.nacha.domain.AchHeader;
-
-import static org.johoco.nacha.constant.FileHeaderFixedWidth.*;
-
-import java.math.BigDecimal;
-
-import static org.johoco.nacha.constant.EntryDetailFixedWidth.*;
+import org.johoco.nacha.domain.AchFileHeader;
 
 public class AchFileLineParser {
 
-    public static AchHeader parseHeader(final String line) {
-        AchHeader header = new AchHeader();
+    public static AchFileHeader parseFileHeader(final String line) {
+        AchFileHeader header = new AchFileHeader();
         header.setRecordTypeCode(line.substring(FileHeaderFixedWidth.RECORD_TYPE_CODE.getStart(), FileHeaderFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        header.setPriorityCode(line.substring(PRIORITY_CODE.getStart(), PRIORITY_CODE.getEnd()));
-        header.setImmediateDestination(line.substring(IMMEDIATE_DESTINATION.getStart(), IMMEDIATE_DESTINATION.getEnd()));
-        header.setImmediateOrigin(line.substring(IMMEDIATE_ORIGIN.getStart(), IMMEDIATE_ORIGIN.getEnd()));
-
+        header.setPriorityCode(line.substring(FileHeaderFixedWidth.PRIORITY_CODE.getStart(), FileHeaderFixedWidth.PRIORITY_CODE.getEnd()));
+        header.setImmediateDestination(line.substring(FileHeaderFixedWidth.IMMEDIATE_DESTINATION.getStart(), FileHeaderFixedWidth.IMMEDIATE_DESTINATION.getEnd()));
+        header.setImmediateOrigin(line.substring(FileHeaderFixedWidth.IMMEDIATE_ORIGIN.getStart(), FileHeaderFixedWidth.IMMEDIATE_ORIGIN.getEnd()));
+        header.setFileCreationDate(line.substring(FileHeaderFixedWidth.FILE_CREATION_DATE.getStart(), FileHeaderFixedWidth.FILE_CREATION_DATE.getEnd()));
+        header.setFileCreationTime(line.substring(FileHeaderFixedWidth.FILE_CREATION_TIME.getStart(), FileHeaderFixedWidth.FILE_CREATION_TIME.getEnd()));
+        header.setFileIdModifier(line.substring(FileHeaderFixedWidth.FILE_ID_MODIFIER.getStart(), FileHeaderFixedWidth.FILE_ID_MODIFIER.getEnd()));
+        header.setRecordSize(line.substring(FileHeaderFixedWidth.RECORD_SIZE.getStart(), FileHeaderFixedWidth.RECORD_SIZE.getEnd()));
+        header.setBlockingFactor(line.substring(FileHeaderFixedWidth.BLOCKING_FACTOR.getStart(), FileHeaderFixedWidth.BLOCKING_FACTOR.getEnd()));
+        header.setFormatCode(line.substring(FileHeaderFixedWidth.FORMAT_CODE.getStart(), FileHeaderFixedWidth.FORMAT_CODE.getEnd()));
+        header.setImmediateDestinationName(line.substring(FileHeaderFixedWidth.IMMEDIATE_DESTINATION_NAME.getStart(), FileHeaderFixedWidth.IMMEDIATE_DESTINATION_NAME.getEnd()));
+        header.setImmediateOriginName(line.substring(FileHeaderFixedWidth.IMMEDIATE_ORIGIN_NAME.getStart(), FileHeaderFixedWidth.IMMEDIATE_ORIGIN_NAME.getEnd()));
+        header.setReferenceCode(line.substring(FileHeaderFixedWidth.REFERENCE_CODE.getStart(), FileHeaderFixedWidth.REFERENCE_CODE.getEnd()));
         return header;
     }
 
     public static AchEntryDetail parseEntryDetail(final String line) {
         AchEntryDetail entryDetail = new AchEntryDetail();
         entryDetail.setRecordTypeCode(line.substring(EntryDetailFixedWidth.RECORD_TYPE_CODE.getStart(), EntryDetailFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        entryDetail.setTransactionCode(line.substring(TRANSACTION_CODE.getStart(), TRANSACTION_CODE.getEnd()));
-        entryDetail.setReceivingDFI(line.substring(RECEIVING_DFI.getStart(), RECEIVING_DFI.getEnd()));
-        entryDetail.setCheckDigit(line.substring(CHECK_DIGIT.getStart(), CHECK_DIGIT.getEnd()));
-        entryDetail.setDFIAccountNumber(line.substring(12, 29).trim());
-        entryDetail.setAmount(Long.parseLong(line.substring(29, 39).trim()));
-        entryDetail.setIndividualIDNumber(line.substring(39, 54).trim());
-        entryDetail.setIndividualName(line.substring(54, 76).trim());
-        entryDetail.setDiscretionaryData(line.substring(76, 78).trim());
-        entryDetail.setAddendaRecordIndicator(line.substring(78, 79));
-        entryDetail.setTraceNumber(line.substring(79, 94));
-
+        entryDetail.setTransactionCode(line.substring(EntryDetailFixedWidth.TRANSACTION_CODE.getStart(), EntryDetailFixedWidth.TRANSACTION_CODE.getEnd()));
+        entryDetail.setReceivingDFIIdentification(line.substring(EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getStart(), EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getEnd()));
+        entryDetail.setCheckDigit(line.substring(EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
+        entryDetail.setDFIAccountNumber(line.substring(EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getStart(), EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getEnd()));
+        entryDetail.setAmount(line.substring(EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
+        entryDetail.setIndividualIdentificationNumber(line.substring(EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(), EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getEnd()));
+        entryDetail.setIndividualName(line.substring(EntryDetailFixedWidth.INDIVIDUAL_NAME.getStart(), EntryDetailFixedWidth.INDIVIDUAL_NAME.getEnd()));
+        entryDetail.setDiscretionaryData(line.substring(EntryDetailFixedWidth.DISCRETIONARY_DATA.getStart(), EntryDetailFixedWidth.DISCRETIONARY_DATA.getEnd()));
+        entryDetail.setAddendaRecordIndicator(line.substring(EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getStart(), EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getEnd()));
+        entryDetail.setTraceNumber(line.substring(EntryDetailFixedWidth.TRACE_NUMBER.getStart(), EntryDetailFixedWidth.TRACE_NUMBER.getEnd()));
         return entryDetail;
     }
 
     public static AchAddendum parseAddendum(final String line) {
         AchAddendum addendum = new AchAddendum();
-        addendum.setRecordTypeCode(line.substring(0, 1));
-        addendum.setAddendaTypeCode(line.substring(1, 3));
-        addendum.setPaymentRelatedInfo(line.substring(3, 83).trim());
-        addendum.setAddendaSequenceNumber(line.substring(83, 87));
-        addendum.setEntryDetailSequenceNumber(line.substring(87, 94));
+        addendum.setRecordTypeCode(line.substring(AddendumFixedWidth.RECORD_TYPE_CODE.getStart(), AddendumFixedWidth.RECORD_TYPE_CODE.getEnd()));
+        addendum.setAddendaTypeCode(line.substring(AddendumFixedWidth.ADDENDA_TYPE_CODE.getStart(), AddendumFixedWidth.ADDENDA_TYPE_CODE.getEnd()));
+        addendum.setPaymentRelatedInfo(line.substring(AddendumFixedWidth.PAYMENT_INFORMATION.getStart(), AddendumFixedWidth.PAYMENT_INFORMATION.getEnd()));
+        addendum.setAddendaSequenceNumber(line.substring(AddendumFixedWidth.ADDENDA_SEQUENCE_NUMBER.getStart(), AddendumFixedWidth.ADDENDA_SEQUENCE_NUMBER.getEnd()));
+        addendum.setEntryDetailSequenceNumber(line.substring(AddendumFixedWidth.ENTRY_DETAIL_SEQUENCE_NUMBER.getStart(), AddendumFixedWidth.ENTRY_DETAIL_SEQUENCE_NUMBER.getEnd()));
+
         return addendum;
     }
 
-    public static AchBatchControlRecord parseBatchControlTotal(String line) {
+    public static AchBatchControlRecord parseBatchControlRecord(String line) {
         AchBatchControlRecord batchControl = new AchBatchControlRecord();
-        batchControl.setRecordTypeCode(line.substring(0, 1));
-        batchControl.setServiceClassCode(line.substring(1, 4));
-        batchControl.setEntryAddendaCount(Integer.parseInt(line.substring(4, 10).trim()));
-        batchControl.setEntryHash(Long.parseLong(line.substring(10, 20).trim()));
-        batchControl.setTotalDebitAmount(Long.parseLong(line.substring(20, 32).trim()));
-        batchControl.setTotalCreditAmount(Long.parseLong(line.substring(32, 44).trim()));
-        batchControl.setCompanyIdentification(line.substring(44, 54));
-        batchControl.setOriginatingDFI(line.substring(54, 62));
-        batchControl.setBatchNumber(line.substring(62, 70));
+        batchControl.setRecordTypeCode(line.substring(BatchControlFixedWidth.RECORD_TYPE_CODE.getStart(), BatchControlFixedWidth.RECORD_TYPE_CODE.getEnd()));
+        batchControl.setServiceClassCode(line.substring(BatchControlFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchControlFixedWidth.SERVICE_CLASS_CODE.getEnd()));
+        batchControl.setEntryAddendaCount(line.substring(BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getStart(), BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getEnd()));
+        batchControl.setEntryHash(line.substring(BatchControlFixedWidth.ENTRY_HASH.getStart(), BatchControlFixedWidth.ENTRY_HASH.getEnd()));
+        batchControl.setTotalDebitAmount(line.substring(BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getEnd()));
+        batchControl.setTotalCreditAmount(line.substring(BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getEnd()));
+        batchControl.setCompanyIdentification(line.substring(BatchControlFixedWidth.COMPANY_IDENTIFICATION.getStart(), BatchControlFixedWidth.COMPANY_IDENTIFICATION.getEnd()));
+        batchControl.setMessageAuthenticationCode(line.substring(BatchControlFixedWidth.MESSAGE_AUTHENTICATION_CODE.getStart(), BatchControlFixedWidth.MESSAGE_AUTHENTICATION_CODE.getEnd()));
+        batchControl.setOriginatingDFIIdentification(line.substring(BatchControlFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(), BatchControlFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getEnd()));
+        batchControl.setBatchNumber(line.substring(BatchControlFixedWidth.BATCH_NUMBER.getStart(), BatchControlFixedWidth.BATCH_NUMBER.getEnd()));
         return batchControl;
     }
 
     public static AchBatchHeaderRecord parseBatchHeaderRecord(String line) {
         AchBatchHeaderRecord batchHeader = new AchBatchHeaderRecord();
-        batchHeader.setRecordTypeCode(line.substring(0, 1));
-        batchHeader.setServiceClassCode(line.substring(1, 4));
-        batchHeader.setCompanyName(line.substring(4, 20).trim());
-        batchHeader.setCompanyIdentification(line.substring(20, 30));
-        batchHeader.setStandardEntryClassCode(line.substring(30, 33));
-        batchHeader.setCompanyEntryDescription(line.substring(33, 43));
-        batchHeader.setCompanyDescriptiveDate(line.substring(43, 49));
-        batchHeader.setEffectiveEntryDate(line.substring(49, 55));
-        batchHeader.setSettlementDate(line.substring(55, 58));
-        batchHeader.setOriginatorStatusCode(line.substring(58, 59));
-        batchHeader.setOriginatingDFI(line.substring(59, 67));
-        batchHeader.setBatchNumber(line.substring(67, 74));
+        batchHeader.setRecordTypeCode(line.substring(BatchHeaderFixedWidth.RECORD_TYPE_CODE.getStart(), BatchHeaderFixedWidth.RECORD_TYPE_CODE.getEnd()));
+        batchHeader.setServiceClassCode(line.substring(BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getEnd()));
+        batchHeader.setCompanyName(line.substring(BatchHeaderFixedWidth.COMPANY_NAME.getStart(), BatchHeaderFixedWidth.COMPANY_NAME.getEnd()));
+        batchHeader.setCompanyDiscretionaryData(line.substring(BatchHeaderFixedWidth.COMPANY_DISCRETIONARY_DATA.getStart(), BatchHeaderFixedWidth.COMPANY_DISCRETIONARY_DATA.getEnd()));
+        batchHeader.setCompanyIdentification(line.substring(BatchHeaderFixedWidth.COMPANY_IDENTIFICATION.getStart(), BatchHeaderFixedWidth.COMPANY_IDENTIFICATION.getEnd()));
+        batchHeader.setStandardEntryClassCode(line.substring(BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getStart(), BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getEnd()));
+        batchHeader.setCompanyEntryDescription(line.substring(BatchHeaderFixedWidth.COMPANY_ENTRY_DESCRIPTION.getStart(), BatchHeaderFixedWidth.COMPANY_ENTRY_DESCRIPTION.getEnd()));
+        batchHeader.setCompanyDescriptiveDate(line.substring(BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getStart(), BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getEnd()));
+        batchHeader.setEffectiveEntryDate(line.substring(BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd()));
+        batchHeader.setSettlementDate(line.substring(BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(), BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd()));
+        batchHeader.setOriginatorStatusCode(line.substring(BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getStart(), BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getEnd()));
+        batchHeader.setOriginatingDFIIdentification(line.substring(BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(), BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getEnd()));
+        batchHeader.setBatchNumber(line.substring(BatchHeaderFixedWidth.BATCH_NUMBER.getStart(), BatchHeaderFixedWidth.BATCH_NUMBER.getEnd()));
+
         return batchHeader;
     }
 

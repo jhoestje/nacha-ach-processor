@@ -8,7 +8,4 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackages = "org.johoco.nacha.repository")  
 @EnableMongoAuditing
 public class MongoDbConfig {
-public MongoDbConfig() {
-   System.out.println("here");
-}
 }
