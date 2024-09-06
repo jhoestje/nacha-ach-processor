@@ -32,6 +32,7 @@ public class AchFileLineParser {
         return header;
     }
 
+    // need to account for PPD and WEB Entry differences
     public static AchEntryDetail parseEntryDetail(final String line) {
         AchEntryDetail entryDetail = new AchEntryDetail();
         entryDetail.setRecordTypeCode(line.substring(EntryDetailFixedWidth.RECORD_TYPE_CODE.getStart(), EntryDetailFixedWidth.RECORD_TYPE_CODE.getEnd()));
@@ -40,8 +41,8 @@ public class AchFileLineParser {
         entryDetail.setCheckDigit(line.substring(EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
         entryDetail.setDFIAccountNumber(line.substring(EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getStart(), EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getEnd()));
         entryDetail.setAmount(line.substring(EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
-        entryDetail.setIndividualIdentificationNumber(line.substring(EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(), EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getEnd()));
-        entryDetail.setIndividualName(line.substring(EntryDetailFixedWidth.INDIVIDUAL_NAME.getStart(), EntryDetailFixedWidth.INDIVIDUAL_NAME.getEnd()));
+        entryDetail.setIdentificationNumber(line.substring(EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(), EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getEnd()));
+        entryDetail.setReceivingName(line.substring(EntryDetailFixedWidth.INDIVIDUAL_NAME.getStart(), EntryDetailFixedWidth.INDIVIDUAL_NAME.getEnd()));
         entryDetail.setDiscretionaryData(line.substring(EntryDetailFixedWidth.DISCRETIONARY_DATA.getStart(), EntryDetailFixedWidth.DISCRETIONARY_DATA.getEnd()));
         entryDetail.setAddendaRecordIndicator(line.substring(EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getStart(), EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getEnd()));
         entryDetail.setTraceNumber(line.substring(EntryDetailFixedWidth.TRACE_NUMBER.getStart(), EntryDetailFixedWidth.TRACE_NUMBER.getEnd()));
@@ -55,11 +56,10 @@ public class AchFileLineParser {
         addendum.setPaymentRelatedInfo(line.substring(AddendumFixedWidth.PAYMENT_INFORMATION.getStart(), AddendumFixedWidth.PAYMENT_INFORMATION.getEnd()));
         addendum.setAddendaSequenceNumber(line.substring(AddendumFixedWidth.ADDENDA_SEQUENCE_NUMBER.getStart(), AddendumFixedWidth.ADDENDA_SEQUENCE_NUMBER.getEnd()));
         addendum.setEntryDetailSequenceNumber(line.substring(AddendumFixedWidth.ENTRY_DETAIL_SEQUENCE_NUMBER.getStart(), AddendumFixedWidth.ENTRY_DETAIL_SEQUENCE_NUMBER.getEnd()));
-
         return addendum;
     }
 
-    public static AchBatchControlRecord parseBatchControlRecord(String line) {
+    public static AchBatchControlRecord parseBatchControlRecord(final String line) {
         AchBatchControlRecord batchControl = new AchBatchControlRecord();
         batchControl.setRecordTypeCode(line.substring(BatchControlFixedWidth.RECORD_TYPE_CODE.getStart(), BatchControlFixedWidth.RECORD_TYPE_CODE.getEnd()));
         batchControl.setServiceClassCode(line.substring(BatchControlFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchControlFixedWidth.SERVICE_CLASS_CODE.getEnd()));
@@ -69,12 +69,13 @@ public class AchFileLineParser {
         batchControl.setTotalCreditAmount(line.substring(BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getEnd()));
         batchControl.setCompanyIdentification(line.substring(BatchControlFixedWidth.COMPANY_IDENTIFICATION.getStart(), BatchControlFixedWidth.COMPANY_IDENTIFICATION.getEnd()));
         batchControl.setMessageAuthenticationCode(line.substring(BatchControlFixedWidth.MESSAGE_AUTHENTICATION_CODE.getStart(), BatchControlFixedWidth.MESSAGE_AUTHENTICATION_CODE.getEnd()));
+        batchControl.setReserved(line.substring(BatchControlFixedWidth.RESERVED.getStart(), BatchControlFixedWidth.RESERVED.getEnd()));
         batchControl.setOriginatingDFIIdentification(line.substring(BatchControlFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(), BatchControlFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getEnd()));
         batchControl.setBatchNumber(line.substring(BatchControlFixedWidth.BATCH_NUMBER.getStart(), BatchControlFixedWidth.BATCH_NUMBER.getEnd()));
         return batchControl;
     }
 
-    public static AchBatchHeaderRecord parseBatchHeaderRecord(String line) {
+    public static AchBatchHeaderRecord parseBatchHeaderRecord(final String line) {
         AchBatchHeaderRecord batchHeader = new AchBatchHeaderRecord();
         batchHeader.setRecordTypeCode(line.substring(BatchHeaderFixedWidth.RECORD_TYPE_CODE.getStart(), BatchHeaderFixedWidth.RECORD_TYPE_CODE.getEnd()));
         batchHeader.setServiceClassCode(line.substring(BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getEnd()));
@@ -89,11 +90,10 @@ public class AchFileLineParser {
         batchHeader.setOriginatorStatusCode(line.substring(BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getStart(), BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getEnd()));
         batchHeader.setOriginatingDFIIdentification(line.substring(BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(), BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getEnd()));
         batchHeader.setBatchNumber(line.substring(BatchHeaderFixedWidth.BATCH_NUMBER.getStart(), BatchHeaderFixedWidth.BATCH_NUMBER.getEnd()));
-
         return batchHeader;
     }
 
-    public static AchFileControlRecord parseFileControlRecord(String line) {
+    public static AchFileControlRecord parseFileControlRecord(final String line) {
         AchFileControlRecord fileControl = new AchFileControlRecord();
         fileControl.setRecordTypeCode(line.substring(0, 1));
         fileControl.setBatchCount(Integer.parseInt(line.substring(1, 7).trim()));
@@ -102,7 +102,6 @@ public class AchFileLineParser {
         fileControl.setEntryHash(Long.parseLong(line.substring(21, 31).trim()));
         fileControl.setTotalDebitAmount(Long.parseLong(line.substring(31, 43).trim()));
         fileControl.setTotalCreditAmount(Long.parseLong(line.substring(43, 55).trim()));
-
         return fileControl;
     }
 }

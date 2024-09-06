@@ -14,8 +14,8 @@ public class AchEntryDetail {
     private String checkDigit;                      // Last digit of the routing number
     private String dFIAccountNumber;                // Account number at the receiving financial institution
     private String amount;                          // Transaction amount in cents
-    private String individualIdentificationNumber;  // Identification number (optional, varies by application)
-    private String individualName;                  // Name of the recipient (person or organization)
+    private String identificationNumber;            // Identification number (optional, varies by application)
+    private String receivingName;                   // Name of the recipient (person or company)
     private String discretionaryData;               // Reserved for use by the originator (optional)
     private String addendaRecordIndicator;          // Indicates whether there's an addenda record (0 = no, 1 = yes)
     private String traceNumber;                     // Unique identifier for the transaction (ODFI's routing number + sequence number)

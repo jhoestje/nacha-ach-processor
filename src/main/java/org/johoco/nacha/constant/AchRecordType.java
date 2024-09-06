@@ -25,7 +25,7 @@ public enum AchRecordType {
 
     public static AchRecordType recordTypeOf(final String recordTypeOf) throws Exception {
         for(AchRecordType t : values()) {
-            if(StringUtils.equals(t.getRecordType(), recordTypeOf)); {
+            if(StringUtils.equals(t.getRecordType(), recordTypeOf)) {
                 return t;
             }
         }

@@ -4,6 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Types of file:  unbalanced vs balanced
+ * Same Day ACH:  rules
+ *  It is a Nacha Rules violation to debit a Receiver prior to the authorization date.
+
+
+ */
 @Getter
 @Setter
 @ToString
