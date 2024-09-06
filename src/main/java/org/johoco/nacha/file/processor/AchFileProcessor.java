@@ -5,25 +5,36 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.johoco.nacha.constant.AchRecordType;
-import org.johoco.nacha.domain.AchAddendum;
+import org.johoco.nacha.domain.AchAddendumRecord;
+import org.johoco.nacha.domain.AchBatch;
 import org.johoco.nacha.domain.AchBatchControlRecord;
 import org.johoco.nacha.domain.AchBatchHeaderRecord;
 import org.johoco.nacha.domain.AchEntryDetail;
 import org.johoco.nacha.domain.AchFileControlRecord;
 import org.johoco.nacha.domain.AchFileLog;
-import org.johoco.nacha.domain.AchFileHeader;
+import org.johoco.nacha.domain.AchPayment;
+import org.johoco.nacha.domain.AchFileHeaderRecord;
 import org.johoco.nacha.parser.AchFileLineParser;
 import org.johoco.nacha.repository.AchFileLogRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AchFileProcessor {
 
-    private AchFileLogRepository logRepository;
+    private Logger LOG = LoggerFactory.getLogger(getClass());
 
-    public AchFileProcessor(final AchFileLogRepository logRepository) {
+    private AchFileLogRepository logRepository;
+    private AchFileLineParser lineParser;
+
+    private String paddingRecordCharacters = "99999";
+
+    public AchFileProcessor(final AchFileLogRepository logRepository, final AchFileLineParser lineParser) {
         this.logRepository = logRepository;
+        this.lineParser = lineParser;
     }
 
     public void process(final File achFile) {
@@ -32,33 +43,51 @@ public class AchFileProcessor {
         logRepository.save(request);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(achFile.getAbsolutePath()))) {
+            AchPayment payments = new AchPayment();
+            AchBatch currentBatch = new AchBatch();
+            AchEntryDetail currentEntryDetail = new AchEntryDetail();
             String line;
             while ((line = reader.readLine()) != null) {
                 String recordTypeValue = line.substring(0, 1);
                 AchRecordType recordType = AchRecordType.recordTypeOf(recordTypeValue);
                 switch (recordType) {
                 case FILE_HEADER_RECORD:
-                    AchFileHeader header = AchFileLineParser.parseFileHeader(line);
+                    AchFileHeaderRecord header = lineParser.parseFileHeader(line);
+                    payments.setFileHeader(header);
                     break;
                 case ENTRY_DETAIL_RECORD:
-                    AchEntryDetail entryDetail = AchFileLineParser.parseEntryDetail(line);
+                    currentEntryDetail = lineParser.parseEntryDetail(line);
+                    currentBatch.addEntryDetail(currentEntryDetail);
                     break;
                 case ADDENDUM:
-                    AchAddendum addendum = AchFileLineParser.parseAddendum(line);
+                    AchAddendumRecord addendum = lineParser.parseAddendum(line);
+                    currentEntryDetail.addAchAddendum(addendum);
                     break;
-                case BATCH_CONTROL_TOTAL:
-                    AchBatchControlRecord controlTotal = AchFileLineParser.parseBatchControlRecord(line);
+                case BATCH_CONTROL_RECORD:
+                    AchBatchControlRecord batchControl = lineParser.parseBatchControlRecord(line);
+                    currentBatch.setControlRecord(batchControl);
+                    payments.addAchBatch(currentBatch);
+                    currentBatch = new AchBatch();
                     break;
                 case BATCH_HEADER_RECORD:
-                    AchBatchHeaderRecord headerRecord = AchFileLineParser.parseBatchHeaderRecord(line);
+                    currentBatch = new AchBatch();
+                    AchBatchHeaderRecord headerRecord = lineParser.parseBatchHeaderRecord(line);
+                    currentBatch.setHeaderRecord(headerRecord);
                     break;
                 case FILE_CONTROL_RECORD:
-                    AchFileControlRecord controlRecord = AchFileLineParser.parseFileControlRecord(line);
+                    if (!StringUtils.startsWith(line, paddingRecordCharacters)) {
+                        AchFileControlRecord controlRecord = lineParser.parseFileControlRecord(line);
+                        payments.setFileControl(controlRecord);
+                    } else {
+                        LOG.info(String.format("Skipping padding record in file %s", achFile.getName()));
+                    }
                     break;
                 }
             }
+            // validate and save
+            LOG.info(String.format("Finished Processing ACH file:  %s:", achFile.getName()));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(String.format("Failed to parse ACH File  %s", achFile.getName()), e);
         }
     }
 

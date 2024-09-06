@@ -5,16 +5,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Types of file:  unbalanced vs balanced
- * Same Day ACH:  rules
- *  It is a Nacha Rules violation to debit a Receiver prior to the authorization date.
-
-
+ * Types of file: unbalanced vs balanced Same Day ACH: rules It is a Nacha Rules
+ * violation to debit a Receiver prior to the authorization date.
+ * 
+ * Reversals or Enforcement
  */
 @Getter
 @Setter
 @ToString
-public class AchFileHeader {
+public class AchFileHeaderRecord {
     private String recordTypeCode;
     private String priorityCode;
     private String immediateDestination;
@@ -28,5 +27,4 @@ public class AchFileHeader {
     private String immediateDestinationName;
     private String immediateOriginName;
     private String referenceCode;
-
 }

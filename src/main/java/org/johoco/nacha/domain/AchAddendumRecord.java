@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class AchAddendum {
+public class AchAddendumRecord {
     private String recordTypeCode; // "7"
     private String addendaTypeCode; // Defines the type of addendum
     private String paymentRelatedInfo; // Holds supplementary information (up to 80 characters)
