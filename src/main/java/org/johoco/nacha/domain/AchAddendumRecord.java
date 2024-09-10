@@ -10,7 +10,7 @@ import lombok.ToString;
 public class AchAddendumRecord {
     private String recordTypeCode; // "7"
     private String addendaTypeCode; // Defines the type of addendum
-    private String paymentRelatedInfo; // Holds supplementary information (up to 80 characters)
-    private String addendaSequenceNumber; // Identifies the sequence number of the addenda (starting at 0001)
-    private String entryDetailSequenceNumber; // Identifies the Entry Detail Record this addendum is tied to
+    private String paymentRelatedInfo; // Not required;  Holds supplementary information (up to 80 characters)
+    private int addendaSequenceNumber; // Identifies the sequence number of the addenda (starting at 0001)
+    private int entryDetailSequenceNumber; // Identifies the Entry Detail Record this addendum is tied to
 }

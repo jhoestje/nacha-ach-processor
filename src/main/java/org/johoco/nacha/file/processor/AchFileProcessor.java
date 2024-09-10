@@ -3,7 +3,6 @@ package org.johoco.nacha.file.processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.johoco.nacha.constant.AchRecordType;
@@ -13,11 +12,12 @@ import org.johoco.nacha.domain.AchBatchControlRecord;
 import org.johoco.nacha.domain.AchBatchHeaderRecord;
 import org.johoco.nacha.domain.AchEntryDetail;
 import org.johoco.nacha.domain.AchFileControlRecord;
+import org.johoco.nacha.domain.AchFileHeaderRecord;
 import org.johoco.nacha.domain.AchFileLog;
 import org.johoco.nacha.domain.AchPayment;
-import org.johoco.nacha.domain.AchFileHeaderRecord;
 import org.johoco.nacha.parser.AchFileLineParser;
 import org.johoco.nacha.repository.AchFileLogRepository;
+import org.johoco.nacha.repository.AchPaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,13 +28,15 @@ public class AchFileProcessor {
     private Logger LOG = LoggerFactory.getLogger(getClass());
 
     private AchFileLogRepository logRepository;
+    private AchPaymentRepository paymentRepository;
     private AchFileLineParser lineParser;
 
     private String paddingRecordCharacters = "99999";
 
-    public AchFileProcessor(final AchFileLogRepository logRepository, final AchFileLineParser lineParser) {
+    public AchFileProcessor(final AchFileLogRepository logRepository, final AchFileLineParser lineParser, final AchPaymentRepository paymentRepository) {
         this.logRepository = logRepository;
         this.lineParser = lineParser;
+        this.paymentRepository = paymentRepository;
     }
 
     public void process(final File achFile) {
@@ -85,6 +87,7 @@ public class AchFileProcessor {
                 }
             }
             // validate and save
+            paymentRepository.save(payments);
             LOG.info(String.format("Finished Processing ACH file:  %s:", achFile.getName()));
         } catch (Exception e) {
             LOG.error(String.format("Failed to parse ACH File  %s", achFile.getName()), e);

@@ -18,4 +18,5 @@ public class AchFileControlRecord {
     private long entryHash;                       // Sum of the routing numbers of all batches (truncated)
     private double totalDebitAmount;                // Total debits in the file (in cents)
     private double totalCreditAmount;               // Total credits in the file (in cents)
+    // Reserved 56-94
 }
