@@ -1,4 +1,4 @@
-package org.johoco.nacha.domain;
+package org.johoco.nacha.file.domain;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.johoco.nacha.constant;
+package org.johoco.nacha.file.parser.fixedwidth;
 
 import lombok.Getter;
 

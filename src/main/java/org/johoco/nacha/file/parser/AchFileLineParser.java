@@ -1,17 +1,17 @@
-package org.johoco.nacha.parser;
+package org.johoco.nacha.file.parser;
 
-import org.johoco.nacha.constant.AddendumFixedWidth;
-import org.johoco.nacha.constant.BatchControlFixedWidth;
-import org.johoco.nacha.constant.BatchHeaderFixedWidth;
-import org.johoco.nacha.constant.EntryDetailFixedWidth;
-import org.johoco.nacha.constant.FileControlFixedWidth;
-import org.johoco.nacha.constant.FileHeaderFixedWidth;
-import org.johoco.nacha.domain.AchAddendumRecord;
-import org.johoco.nacha.domain.AchBatchControlRecord;
-import org.johoco.nacha.domain.AchBatchHeaderRecord;
-import org.johoco.nacha.domain.AchEntryDetail;
-import org.johoco.nacha.domain.AchFileControlRecord;
-import org.johoco.nacha.domain.AchFileHeaderRecord;
+import org.johoco.nacha.file.domain.AchAddendumRecord;
+import org.johoco.nacha.file.domain.AchBatchControlRecord;
+import org.johoco.nacha.file.domain.AchBatchHeaderRecord;
+import org.johoco.nacha.file.domain.AchEntryDetail;
+import org.johoco.nacha.file.domain.AchFileControlRecord;
+import org.johoco.nacha.file.domain.AchFileHeaderRecord;
+import org.johoco.nacha.file.parser.fixedwidth.AddendumFixedWidth;
+import org.johoco.nacha.file.parser.fixedwidth.BatchControlFixedWidth;
+import org.johoco.nacha.file.parser.fixedwidth.BatchHeaderFixedWidth;
+import org.johoco.nacha.file.parser.fixedwidth.EntryDetailFixedWidth;
+import org.johoco.nacha.file.parser.fixedwidth.FileControlFixedWidth;
+import org.johoco.nacha.file.parser.fixedwidth.FileHeaderFixedWidth;
 import org.springframework.stereotype.Service;
 
 @Service
