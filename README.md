@@ -1,5 +1,6 @@
 # nacha-ach-processor
 
+## Install lombok to the IDE
 
 
 
@@ -9,3 +10,5 @@ https://achdevguide.nacha.org/ach-file-details
 https://www.ach-pro.com/post/common-nacha-file-examples#viewer-fee8u
 https://www.treasurysoftware.com/ach/how-do-i-create-an-ach-nacha-file-detailed-file-format.aspx
 https://www.ach-pro.com/post/create-a-nacha-file-by-hand
+
+https://nachatech.com/validate-ach/identifying-and-resolving-common-errors-in-nacha-files/

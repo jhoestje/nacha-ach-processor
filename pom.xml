@@ -8,11 +8,11 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.johoco.nacha</groupId>
-	<artifactId>nacha-ach-processor</artifactId>
+	<groupId>org.johoco</groupId>
+	<artifactId>ach-payroll-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>nacha-ach-processor</name>
-	<description>Nacha ACH file processor</description>
+	<name>ach-payroll-app</name>
+	<description>Nacha ACH payroll application</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

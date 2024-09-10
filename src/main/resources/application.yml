@@ -1,6 +1,6 @@
 spring:
   application:
-    name: nacha-ach-processor
+    name: ach-payroll-app
   data:
     mongodb:
       database: nachadb
