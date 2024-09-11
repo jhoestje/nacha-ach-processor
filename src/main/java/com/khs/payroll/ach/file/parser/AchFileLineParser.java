@@ -48,7 +48,7 @@ public class AchFileLineParser {
         entryDetail.setCheckDigit(cleanInteger(line, EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
         entryDetail.setDFIAccountNumber(
                 cleanStringData(line, EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getStart(), EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getEnd()));
-        entryDetail.setAmount(cleanStringData(line, EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
+        entryDetail.setAmount(cleanDouble(line, EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
         entryDetail.setIdentificationNumber(cleanStringData(line, EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(),
                 EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getEnd()));
         entryDetail.setReceivingName(cleanStringData(line, EntryDetailFixedWidth.INDIVIDUAL_NAME.getStart(), EntryDetailFixedWidth.INDIVIDUAL_NAME.getEnd()));

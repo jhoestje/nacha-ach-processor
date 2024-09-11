@@ -16,15 +16,11 @@ import lombok.ToString;
 @ToString
 @Document("achFileLogs")
 public class AchFileLog {
-    
     @Id
     private String id;
-    
     private String filename;
-    
     @CreatedDate
     private Instant createdDate;
-    
     @LastModifiedDate
     private Instant lastModifiedDate;
 }

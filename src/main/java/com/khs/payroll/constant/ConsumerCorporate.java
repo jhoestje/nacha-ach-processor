@@ -8,9 +8,9 @@ public enum ConsumerCorporate {
     CORPORATE("Corporate"),
     BOTH("Both");
     
-    private String type;
+    private final String type;
     
-    ConsumerCorporate(String type) {
+    ConsumerCorporate(final String type) {
         this.type = type;
     }
     

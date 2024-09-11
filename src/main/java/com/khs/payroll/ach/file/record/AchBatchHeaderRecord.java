@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class AchBatchHeaderRecord {
     private String recordTypeCode;                  // "5" for Batch Header
-    private int serviceClassCode;                // Identifies the type of transaction (e.g., 220 for credits)
+    private int serviceClassCode;                   // Identifies the type of transaction (e.g., 220 for credits)
     private String companyName;                     // The name of the company (Originator)
     private String companyDiscretionaryData;        // Not required;  Originator/ODFI may include codes of significance only to them to enable specialized handling of all entries within the batch.
     private String companyIdentification;           // Identification of the company (can be EIN or other identifier)
