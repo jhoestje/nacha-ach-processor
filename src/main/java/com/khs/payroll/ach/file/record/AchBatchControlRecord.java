@@ -1,5 +1,14 @@
 package com.khs.payroll.ach.file.record;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,15 +20,47 @@ import lombok.ToString;
 @Setter
 @ToString
 public class AchBatchControlRecord {
-    private String recordTypeCode;                  // "8" for Batch Control
-    private int serviceClassCode;                // Identifies the type of transaction (e.g., 220 for credits)
-    private int entryAddendaCount;               // Number of Entry and Addenda records in the batch
-    private int entryHash;                       // Sum of routing numbers from the Entry Detail records (used for verification)
-    private double totalDebitAmount;                // Total debits in the batch (in cents)
-    private double totalCreditAmount;               // Total credits in the batch (in cents)
-    private String companyIdentification;           // Company identification (should match Batch Header; usually their IRS EIN)
-    private String messageAuthenticationCode;       // Not Required;  Optional field; often blank; The 8-character code from a special key
-    private String reserved;                        // Reserved (Position 74-79): Reserved for future use, typically left blank.
-    private int originatingDFIIdentification;    // First 8 digits of the originating DFI routing number
-    private int batchNumber;                     // A sequential number assigned to the batch, used for tracking
+    @NotBlank(message = "Record Type Code is required")
+    private String recordTypeCode; // "8" for Batch Control
+
+    @NotNull(message = "Service Class Code is mandatory")
+    @Min(value = 200, message = "Service Class Code must be a valid code (e.g., 220, 225)")
+    @Max(value = 299, message = "Service Class Code must be within the valid range (200-299)")
+    private Integer serviceClassCode; // Identifies the type of transaction (e.g., 220 for credits)
+
+    @NotNull(message = "Entry Addenda Count is mandatory")
+    @Positive(message = "Entry Addenda Count must be a positive number")
+    private Integer entryAddendaCount; // Number of Entry and Addenda records in the batch
+
+    @NotNull(message = "Entry Hash is mandatory")
+    @Positive(message = "Entry Hash must be a positive number")
+    private Integer entryHash; // Sum of routing numbers from the Entry Detail records (used for verification)
+
+    @NotNull(message = "Total Debit Amount is mandatory")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total Debit Amount must be zero or positive")
+    private Double totalDebitAmount; // Total debits in the batch (in cents)
+
+    @NotNull(message = "Total Credit Amount is mandatory")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total Credit Amount must be zero or positive")
+    private Double totalCreditAmount; // Total credits in the batch (in cents)
+
+    @NotBlank(message = "Company Identification is mandatory")
+    @Size(max = 10, message = "Company Identification must not exceed 10 characters")
+    private String companyIdentification; // Company identification (should match Batch Header; usually their IRS EIN)
+
+    @Nullable
+    @Size(max = 8, message = "Message Authentication Code must not exceed 8 characters")
+    private String messageAuthenticationCode; // Not Required; Optional field; often blank; The 8-character code from a
+                                              // special key
+    @Nullable
+    @Size(max = 6, message = "Reserved field must not exceed 6 characters")
+    private String reserved; //  Not Required; Reserved (Position 74-79): Reserved for future use, typically left blank.
+
+    @NotNull(message = "Originating DFI Identification is mandatory")
+    @Digits(integer = 8, fraction = 0, message = "Originating DFI Identification must be an 8-digit number")
+    private Integer originatingDFIIdentification; // First 8 digits of the originating DFI routing number
+
+    @NotNull(message = "Batch Number is mandatory")
+    @Positive(message = "Batch Number must be a positive number")
+    private Integer batchNumber; // A sequential number assigned to the batch, used for tracking
 }

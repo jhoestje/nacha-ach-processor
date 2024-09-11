@@ -1,5 +1,10 @@
 package com.khs.payroll.ach.file.parser;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Optional;
+
 import com.khs.payroll.ach.file.parser.fixedwidth.AddendumFixedWidth;
 import com.khs.payroll.ach.file.parser.fixedwidth.BatchControlFixedWidth;
 import com.khs.payroll.ach.file.parser.fixedwidth.BatchHeaderFixedWidth;
@@ -9,11 +14,17 @@ import com.khs.payroll.ach.file.parser.fixedwidth.FileHeaderFixedWidth;
 import com.khs.payroll.ach.file.record.AchAddendumRecord;
 import com.khs.payroll.ach.file.record.AchBatchControlRecord;
 import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
-import com.khs.payroll.ach.file.record.AchEntryDetail;
+import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.record.AchFileControlRecord;
 import com.khs.payroll.ach.file.record.AchFileHeaderRecord;
+import com.khs.payroll.constant.ServiceClassCode;
+import com.khs.payroll.constant.StandardEntryClassCode;
+import com.khs.payroll.constant.TransactionCode;
 
 public class AchFileLineParser {
+
+    private DateFormat dateFormat = new SimpleDateFormat("YYMMDD");
+    // Time format HHMM 24 Hour
 
     public AchFileHeaderRecord parseFileHeader(final String line) {
         AchFileHeaderRecord header = new AchFileHeaderRecord();
@@ -37,12 +48,12 @@ public class AchFileLineParser {
     }
 
     // need to account for PPD and WEB Entry differences
-    public AchEntryDetail parseEntryDetail(final String line) {
-        AchEntryDetail entryDetail = new AchEntryDetail();
+    public AchEntryDetailRecord parseEntryDetail(final String line) {
+        AchEntryDetailRecord entryDetail = new AchEntryDetailRecord();
         entryDetail
                 .setRecordTypeCode(cleanStringData(line, EntryDetailFixedWidth.RECORD_TYPE_CODE.getStart(), EntryDetailFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        entryDetail
-                .setTransactionCode(cleanInteger(line, EntryDetailFixedWidth.TRANSACTION_CODE.getStart(), EntryDetailFixedWidth.TRANSACTION_CODE.getEnd()));
+        entryDetail.setTransactionCode(TransactionCode
+                .valueOf(cleanStringData(line, EntryDetailFixedWidth.TRANSACTION_CODE.getStart(), EntryDetailFixedWidth.TRANSACTION_CODE.getEnd())));
         entryDetail.setReceivingDFIIdentification(cleanStringData(line, EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getStart(),
                 EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getEnd()));
         entryDetail.setCheckDigit(cleanInteger(line, EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
@@ -97,27 +108,42 @@ public class AchFileLineParser {
         return batchControl;
     }
 
-    public AchBatchHeaderRecord parseBatchHeaderRecord(final String line) {
+    public AchBatchHeaderRecord parseBatchHeaderRecord(final String line) throws ParseException {
         AchBatchHeaderRecord batchHeader = new AchBatchHeaderRecord();
         batchHeader
                 .setRecordTypeCode(cleanStringData(line, BatchHeaderFixedWidth.RECORD_TYPE_CODE.getStart(), BatchHeaderFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        batchHeader.setServiceClassCode(
-                cleanInteger(line, BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getEnd()));
+        String serviceClassCodeString = cleanStringData(line, BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart(),
+                BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getEnd());
+        Optional<ServiceClassCode> serviceClassCodeOpt = ServiceClassCode.findByCode(serviceClassCodeString);
+        if (serviceClassCodeOpt.isEmpty()) {
+            throw new ParseException(String.format("Unknown Service Class code %s", serviceClassCodeString),
+                    BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart());
+        }
+        batchHeader.setServiceClassCode(serviceClassCodeOpt.get());
         batchHeader.setCompanyName(cleanStringData(line, BatchHeaderFixedWidth.COMPANY_NAME.getStart(), BatchHeaderFixedWidth.COMPANY_NAME.getEnd()));
         batchHeader.setCompanyDiscretionaryData(
                 cleanStringData(line, BatchHeaderFixedWidth.COMPANY_DISCRETIONARY_DATA.getStart(), BatchHeaderFixedWidth.COMPANY_DISCRETIONARY_DATA.getEnd()));
         batchHeader.setCompanyIdentification(
                 cleanStringData(line, BatchHeaderFixedWidth.COMPANY_IDENTIFICATION.getStart(), BatchHeaderFixedWidth.COMPANY_IDENTIFICATION.getEnd()));
-        batchHeader.setStandardEntryClassCode(
-                cleanStringData(line, BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getStart(), BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getEnd()));
+
+        String secCodeString = cleanStringData(line, BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getStart(),
+                BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getEnd());
+        Optional<StandardEntryClassCode> secCodeOpt = StandardEntryClassCode.findByCode(secCodeString);
+        if (secCodeOpt.isEmpty()) {
+            throw new ParseException(String.format("Unknown Stand Entry Class code %s", secCodeString),
+                    BatchHeaderFixedWidth.STANDARD_ENTRY_CLASS_CODE.getStart());
+        }
+        batchHeader.setStandardEntryClassCode(secCodeOpt.get());
+
         batchHeader.setCompanyEntryDescription(
                 cleanStringData(line, BatchHeaderFixedWidth.COMPANY_ENTRY_DESCRIPTION.getStart(), BatchHeaderFixedWidth.COMPANY_ENTRY_DESCRIPTION.getEnd()));
         batchHeader.setCompanyDescriptiveDate(
                 cleanStringData(line, BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getStart(), BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getEnd()));
-        batchHeader.setEffectiveEntryDate(
-                cleanStringData(line, BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd()));
-        batchHeader.setSettlementDate(
-                cleanStringData(line, BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(), BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd()));
+        // check date format
+        batchHeader.setEffectiveEntryDate(dateFormat
+                .parse(cleanStringData(line, BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd())));
+        batchHeader.setSettlementDate(dateFormat
+                .parse(cleanStringData(line, BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(), BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd())));
         batchHeader.setOriginatorStatusCode(
                 cleanStringData(line, BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getStart(), BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getEnd()));
         batchHeader.setOriginatingDFIIdentification(cleanStringData(line, BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(),

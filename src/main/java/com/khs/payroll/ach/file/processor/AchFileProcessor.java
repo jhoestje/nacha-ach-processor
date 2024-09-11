@@ -15,7 +15,7 @@ import com.khs.payroll.ach.file.record.AchAddendumRecord;
 import com.khs.payroll.ach.file.record.AchBatch;
 import com.khs.payroll.ach.file.record.AchBatchControlRecord;
 import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
-import com.khs.payroll.ach.file.record.AchEntryDetail;
+import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.record.AchFileControlRecord;
 import com.khs.payroll.ach.file.record.AchFileHeaderRecord;
 import com.khs.payroll.ach.file.record.AchPayment;
@@ -50,7 +50,7 @@ public class AchFileProcessor {
         try (BufferedReader reader = new BufferedReader(new FileReader(achFile.getAbsolutePath()))) {
             AchPayment payments = new AchPayment();
             AchBatch currentBatch = new AchBatch();
-            AchEntryDetail currentEntryDetail = new AchEntryDetail();
+            AchEntryDetailRecord currentEntryDetail = new AchEntryDetailRecord();
             String line;
             while ((line = reader.readLine()) != null) {
                 String recordTypeValue = line.substring(0, 1);

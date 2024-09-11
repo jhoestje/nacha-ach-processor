@@ -9,7 +9,7 @@ import org.springframework.boot.devtools.filewatch.FileSystemWatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.khs.payroll.file.listener.AchFileChangeListener;
+import com.khs.payroll.ach.file.listener.AchFileChangeListener;
 import com.khs.payroll.properties.ApplicationProperties;
 import com.khs.payroll.properties.FileWatcherProperties;
 
