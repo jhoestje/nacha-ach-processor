@@ -1,10 +1,10 @@
 package com.khs.payroll.ach.file.record;
 
+import com.khs.payroll.constant.ServiceClassCode;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -23,10 +23,8 @@ public class AchBatchControlRecord {
     @NotBlank(message = "Record Type Code is required")
     private String recordTypeCode; // "8" for Batch Control
 
-    @NotNull(message = "Service Class Code is mandatory")
-    @Min(value = 200, message = "Service Class Code must be a valid code (e.g., 220, 225)")
-    @Max(value = 299, message = "Service Class Code must be within the valid range (200-299)")
-    private Integer serviceClassCode; // Identifies the type of transaction (e.g., 220 for credits)
+    @NotNull(message = "Service Class Code is required")
+    private ServiceClassCode serviceClassCode;      // Identifies the type of transaction (e.g., 220 for credits)
 
     @NotNull(message = "Entry Addenda Count is mandatory")
     @Positive(message = "Entry Addenda Count must be a positive number")

@@ -2,30 +2,33 @@ package com.khs.payroll.ach.file.listener;
 
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.devtools.filewatch.ChangedFile;
 import org.springframework.boot.devtools.filewatch.ChangedFile.Type;
 import org.springframework.boot.devtools.filewatch.ChangedFiles;
 import org.springframework.boot.devtools.filewatch.FileChangeListener;
 import org.springframework.stereotype.Component;
 
-import com.khs.payroll.ach.file.processor.AchFileProcessor;
+import com.khs.payroll.processor.IncomingPaymentFileProcessor;
 
 @Component
 public class AchFileChangeListener implements FileChangeListener {
 
-    private AchFileProcessor fileProcessor;
+    private Logger LOG = LoggerFactory.getLogger(getClass());
+    private IncomingPaymentFileProcessor processor;
 
-    public AchFileChangeListener(final AchFileProcessor fileProcessor) {
-        this.fileProcessor = fileProcessor;
+    public AchFileChangeListener(final IncomingPaymentFileProcessor processor) {
+        this.processor = processor;
     }
 
     @Override
     public void onChange(Set<ChangedFiles> changeSet) {
         for (ChangedFiles files : changeSet) {
             for (ChangedFile cf : files.getFiles()) {
-                System.out.println(cf.getType() + ":" + cf.getFile().getName());
+                LOG.debug(cf.getType() + ":" + cf.getFile().getName());
                 if (Type.ADD.equals(cf.getType()))
-                    fileProcessor.process(cf.getFile());
+                    processor.process(cf.getFile());
             }
         }
     }

@@ -3,6 +3,7 @@ package com.khs.payroll.ach.file.record;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.validator.constraints.Range;
 import org.springframework.lang.Nullable;
 
 import com.khs.payroll.constant.TransactionCode;
@@ -36,11 +37,12 @@ public class AchEntryDetailRecord {
     private Integer checkDigit;                         // Last digit of the routing number
     
     @NotBlank(message = "DFI Account Number must be 8 characters")
-    @Size(min = 8, max = 8)
-    private String dFIAccountNumber;                // Account number at the receiving financial institution
+    @Size(min = 1, max = 17)
+    private String dfiAccountNumber;                // Account number at the receiving financial institution
     
     @NotNull(message = "Amount is required")
     private Double amount;                          // Transaction amount in cents
+   
     @Nullable
     private String identificationNumber;            // Not required;  Identification number (optional, varies by application)
     
@@ -53,12 +55,12 @@ public class AchEntryDetailRecord {
     //Payment Type Code                             // TEL and WEB entries;  codes, of significance to them, to enable specialized handling of the entry
   
     @NotNull(message = "Addenda Record Indicator is mandatory")
-    @Size(min = 0, max = 1, message = "Addenda Record Indicator must be either 0 (no) or 1 (yes)")
+    @Range(min = 0, max = 1, message = "Addenda Record Indicator must be either 0 (no) or 1 (yes)")
     private Integer addendaRecordIndicator;             // Indicates whether there's an addenda record (0 = no, 1 = yes)
     
     @NotNull(message = "Trace Number is mandatory")
     @Positive(message = "Trace Number must be a positive number")
-    private Integer traceNumber;                        // Unique identifier for the transaction (ODFI's routing number + sequence number)
+    private Long traceNumber;                        // Unique identifier for the transaction (ODFI's routing number + sequence number)
     
     @Valid
     private List<AchAddendumRecord> addenda;        // IAT can have more than one

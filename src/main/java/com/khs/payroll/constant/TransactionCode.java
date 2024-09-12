@@ -1,5 +1,7 @@
 package com.khs.payroll.constant;
 
+import java.util.Optional;
+
 import lombok.Getter;
 
 @Getter
@@ -27,16 +29,16 @@ public enum TransactionCode {
         this.consumerOrCorporate = consumerOrCorporate;
     }
 
-
-    // Static method to find TransactionCode by its numeric code
-    public static TransactionCode findByCode(int code) {
+    public static Optional<TransactionCode> findByCode(int code) {
         for (TransactionCode transactionCode : TransactionCode.values()) {
             if (transactionCode.getCode() == code) {
-                return transactionCode;
+                return Optional.of(transactionCode);
             }
         }
-        // Optionally throw an exception or return null if not found
-        return null;
+        return Optional.empty();
+    }
+
+    public static Optional<TransactionCode> findByCode(String code) {
+        return findByCode(Integer.parseInt(code));
     }
 }
-

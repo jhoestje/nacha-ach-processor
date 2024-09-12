@@ -6,7 +6,8 @@ import org.springframework.validation.Validator;
 import com.khs.payroll.ach.file.record.AchAddendumRecord;
 import com.khs.payroll.ach.file.record.AchPayment;
 
-public class AchAddendumDataValidator implements  Validator {
+@Deprecated
+public class AchAddendumDataValidator {
     
     public void validate(final AchPayment payment) {
         // validate file header and control are present
@@ -21,15 +22,6 @@ public class AchAddendumDataValidator implements  Validator {
     //For Payroll/Direct Deposits
     //should use the 'PPD' standard entry class code (SEC code) and, as with all ACH batches, an informative company entry description should be included
 
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return AchAddendumRecord.class.isAssignableFrom(clazz);
-    }
-
-    @Override
-    public void validate(Object target, Errors errors) {
-        // TODO Auto-generated method stub
-    }
 
     
     

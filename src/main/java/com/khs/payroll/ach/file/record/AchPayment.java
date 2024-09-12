@@ -23,18 +23,18 @@ import lombok.ToString;
 public class AchPayment {
     @Id
     private String id;
-
-    @NotNull(message = "ACH File Header Record is required")
+    
     @Valid
+    @NotNull(message = "ACH File Header Record is required")
     private AchFileHeaderRecord fileHeader;
 
+    @Valid
     @NotNull(message = "Batch Records list is required")
     @Size(min = 1, message = "At least one Batch Record is required")
-    @Valid
     private List<AchBatch> batchRecords;
 
-    @NotNull(message = "ACH File Control Record is required")
     @Valid
+    @NotNull(message = "ACH File Control Record is required")
     private AchFileControlRecord fileControl;
 
     @CreatedDate

@@ -42,7 +42,7 @@ public class AchFileProcessor {
         this.paymentRepository = paymentRepository;
     }
 
-    public void process(final File achFile) {
+    public AchPayment process(final File achFile) throws Exception {
         AchFileLog request = new AchFileLog();
         request.setFilename(achFile.getName());
         logRepository.save(request);
@@ -92,12 +92,15 @@ public class AchFileProcessor {
                 } else {
                     // fail file with details
                 }
-                // validate and save
-                paymentRepository.save(payments);
-                LOG.info(String.format("Finished Processing ACH file:  %s:", achFile.getName()));
             }
+         // validate and save
+            //paymentRepository.save(payments);
+            LOG.info(String.format("Finished parsing ACH file:  %s:", achFile.getName()));
+            return payments;
         } catch (Exception e) {
             LOG.error(String.format("Failed to parse ACH File  %s", achFile.getName()), e);
+            //need to change exception type to bad file
+            throw e;
         }
     }
 

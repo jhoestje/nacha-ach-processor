@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum FileHeaderFixedWidth {
     RECORD_TYPE_CODE(0, 1),
     PRIORITY_CODE(1, 3),
-    IMMEDIATE_DESTINATION(3, 13),
-    IMMEDIATE_ORIGIN(13, 23),
+    IMMEDIATE_DESTINATION(4, 13), // first character is a blank; don't include
+    IMMEDIATE_ORIGIN(14, 23), // first character is a blank; don't include
     FILE_CREATION_DATE(23, 29),
     FILE_CREATION_TIME(29, 33),
     FILE_ID_MODIFIER(33, 34),

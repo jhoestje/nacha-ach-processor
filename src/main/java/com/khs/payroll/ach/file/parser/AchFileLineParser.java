@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.khs.payroll.ach.file.parser.fixedwidth.AddendumFixedWidth;
 import com.khs.payroll.ach.file.parser.fixedwidth.BatchControlFixedWidth;
 import com.khs.payroll.ach.file.parser.fixedwidth.BatchHeaderFixedWidth;
@@ -48,16 +50,23 @@ public class AchFileLineParser {
     }
 
     // need to account for PPD and WEB Entry differences
-    public AchEntryDetailRecord parseEntryDetail(final String line) {
+    public AchEntryDetailRecord parseEntryDetail(final String line) throws ParseException {
         AchEntryDetailRecord entryDetail = new AchEntryDetailRecord();
         entryDetail
                 .setRecordTypeCode(cleanStringData(line, EntryDetailFixedWidth.RECORD_TYPE_CODE.getStart(), EntryDetailFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        entryDetail.setTransactionCode(TransactionCode
-                .valueOf(cleanStringData(line, EntryDetailFixedWidth.TRANSACTION_CODE.getStart(), EntryDetailFixedWidth.TRANSACTION_CODE.getEnd())));
+
+        String transactionCodeString = cleanStringData(line, EntryDetailFixedWidth.TRANSACTION_CODE.getStart(),
+                EntryDetailFixedWidth.TRANSACTION_CODE.getEnd());
+        Optional<TransactionCode> transactionCodeOpt = TransactionCode.findByCode(transactionCodeString);
+        if (transactionCodeOpt.isEmpty()) {
+            throw new ParseException(String.format("Unknown Transaction code %s", transactionCodeString),
+                    BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart());
+        }
+        entryDetail.setTransactionCode(transactionCodeOpt.get());
         entryDetail.setReceivingDFIIdentification(cleanStringData(line, EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getStart(),
                 EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getEnd()));
         entryDetail.setCheckDigit(cleanInteger(line, EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
-        entryDetail.setDFIAccountNumber(
+        entryDetail.setDfiAccountNumber(
                 cleanStringData(line, EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getStart(), EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getEnd()));
         entryDetail.setAmount(cleanDouble(line, EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
         entryDetail.setIdentificationNumber(cleanStringData(line, EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(),
@@ -67,7 +76,7 @@ public class AchFileLineParser {
                 cleanStringData(line, EntryDetailFixedWidth.DISCRETIONARY_DATA.getStart(), EntryDetailFixedWidth.DISCRETIONARY_DATA.getEnd()));
         entryDetail.setAddendaRecordIndicator(
                 cleanInteger(line, EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getStart(), EntryDetailFixedWidth.ADDENDA_RECORD_INDICATOR.getEnd()));
-        entryDetail.setTraceNumber(cleanInteger(line, EntryDetailFixedWidth.TRACE_NUMBER.getStart(), EntryDetailFixedWidth.TRACE_NUMBER.getEnd()));
+        entryDetail.setTraceNumber(cleanLong(line, EntryDetailFixedWidth.TRACE_NUMBER.getStart(), EntryDetailFixedWidth.TRACE_NUMBER.getEnd()));
         return entryDetail;
     }
 
@@ -84,12 +93,18 @@ public class AchFileLineParser {
         return addendum;
     }
 
-    public AchBatchControlRecord parseBatchControlRecord(final String line) {
+    public AchBatchControlRecord parseBatchControlRecord(final String line) throws ParseException {
         AchBatchControlRecord batchControl = new AchBatchControlRecord();
         batchControl
                 .setRecordTypeCode(cleanStringData(line, BatchControlFixedWidth.RECORD_TYPE_CODE.getStart(), BatchControlFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        batchControl.setServiceClassCode(
-                cleanInteger(line, BatchControlFixedWidth.SERVICE_CLASS_CODE.getStart(), BatchControlFixedWidth.SERVICE_CLASS_CODE.getEnd()));
+        String serviceClassCodeString = cleanStringData(line, BatchControlFixedWidth.SERVICE_CLASS_CODE.getStart(),
+                BatchControlFixedWidth.SERVICE_CLASS_CODE.getEnd());
+        Optional<ServiceClassCode> serviceClassCodeOpt = ServiceClassCode.findByCode(serviceClassCodeString);
+        if (serviceClassCodeOpt.isEmpty()) {
+            throw new ParseException(String.format("Unknown Service Class code %s", serviceClassCodeString),
+                    BatchControlFixedWidth.SERVICE_CLASS_CODE.getStart());
+        }
+        batchControl.setServiceClassCode(serviceClassCodeOpt.get());
         batchControl.setEntryAddendaCount(
                 cleanInteger(line, BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getStart(), BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getEnd()));
         batchControl.setEntryHash(cleanInteger(line, BatchControlFixedWidth.ENTRY_HASH.getStart(), BatchControlFixedWidth.ENTRY_HASH.getEnd()));
@@ -142,8 +157,12 @@ public class AchFileLineParser {
         // check date format
         batchHeader.setEffectiveEntryDate(dateFormat
                 .parse(cleanStringData(line, BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd())));
-        batchHeader.setSettlementDate(dateFormat
-                .parse(cleanStringData(line, BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(), BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd())));
+
+        String settlementDateString = cleanStringData(line, BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(),
+                BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd());
+        if (StringUtils.isNotBlank(settlementDateString)) {
+            batchHeader.setSettlementDate(dateFormat.parse(settlementDateString));
+        }
         batchHeader.setOriginatorStatusCode(
                 cleanStringData(line, BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getStart(), BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getEnd()));
         batchHeader.setOriginatingDFIIdentification(cleanStringData(line, BatchHeaderFixedWidth.ORIGINATING_DFI_IDENTIFICATION.getStart(),

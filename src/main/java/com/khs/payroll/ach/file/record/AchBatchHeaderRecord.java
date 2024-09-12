@@ -44,7 +44,6 @@ public class AchBatchHeaderRecord {
     @Size(max = 10, message = "Company Entry Description must not exceed 10 characters")
     private String companyEntryDescription;         // Describes the purpose (e.g., "PAYROLL", "VENDOR PAY")
     
-    @NotBlank(message = "Company Descriptive Date is required")
     @Size(max = 6, message = "Company Descriptive Date must not exceed 6 characters")
     private String companyDescriptiveDate;          // A date description like "JANUARY PAY"
     

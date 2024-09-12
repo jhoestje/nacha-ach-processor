@@ -29,7 +29,7 @@ public class PayrollPayment {
     private TransactionCode transactionCode;        // Identifies the type of transaction (e.g., credit, debit)
     private String receivingDFIIdentification;      // First 8 digits of the receiving bank's routing number
     private int checkDigit;                         // Last digit of the routing number
-    private String dFIAccountNumber;                // Account number at the receiving financial institution
+    private String dfiAccountNumber;                // Account number at the receiving financial institution
     private String amount;                          // Transaction amount in cents
     private String identificationNumber;            // Not required;  Identification number (optional, varies by application)
     private String receivingName;                   // Name of the recipient (person or company)
