@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.khs.payroll.ach.file.processor.AchFileProcessor;
 import com.khs.payroll.ach.file.record.AchPayment;
 import com.khs.payroll.ach.file.validator.AchDataValidator;
+import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
 
 @Component
 public class IncomingPaymentFileProcessor {
@@ -24,7 +25,8 @@ public class IncomingPaymentFileProcessor {
     public void process(final File achFile) {
         try {
             AchPayment payments = fileProcessor.process(achFile);
-            validator.validate(payments);
+            AchFileValidationContext context =new AchFileValidationContext(achFile.getName());
+            validator.validate(payments, context);
             LOG.info("finsihed validation");
         } catch (Exception e) {
             LOG.error(String.format("Failed to register incoming payments File  %s", achFile.getName()), e);

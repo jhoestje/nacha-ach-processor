@@ -1,10 +1,8 @@
 package com.khs.payroll.ach.file.validator;
 
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
-
 import com.khs.payroll.ach.file.record.AchPayment;
 
+@Deprecated
 public class AchPaymentsValidator {
 
     public void validate(final AchPayment payment) {

@@ -1,20 +1,39 @@
 package com.khs.payroll.ach.file.validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.khs.payroll.ach.file.record.AchBatch;
 import com.khs.payroll.ach.file.record.AchBatchControlRecord;
+import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
-import com.khs.payroll.ach.file.record.AchPayment;
+import com.khs.payroll.ach.file.validator.constant.ValidationStep;
+import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
+import com.khs.payroll.constant.StandardEntryClassCode;
 
-import jakarta.validation.Validator;
-
+// ACH batches, an informative company entry description should be included
 public class AchBatchDataValidator {
 
-    private Validator validator;
+    private Logger LOG = LoggerFactory.getLogger(getClass());
 
-    public AchBatchDataValidator(final Validator validator) {
-        this.validator = validator;
+    public AchBatchDataValidator() {
+    }
+
+    /**
+     * Batch control total “sums up all entries' count and dollar amount. It also
+     * includes a hash total (i.e., checksum) to ensure validity of the batch.”
+     *
+     * @param batch
+     * @param control
+     */
+    public void validate(final AchBatch batch, final AchFileValidationContext context) {
+        context.setCurrentBatch(batch);
+        // validate numbers and sums
+        validateStandardEntryClassCode(batch, context);
+        validateAmounts(batch, context);
+        validateEntryHash(batch, context);
+        context.resetCurrentBatch();
     }
 
     /**
@@ -23,9 +42,8 @@ public class AchBatchDataValidator {
      * @param payment
      */
     @SuppressWarnings("incomplete-switch")
-    public void validate(final AchBatch batch) {
-        // validate numbers and sums
-
+    private void validateAmounts(final AchBatch batch, final AchFileValidationContext context) {
+        context.setCurrentValidationStep(ValidationStep.BATCH_AMOUNTS);
         AchBatchControlRecord control = batch.getControlRecord();
         // entry+ addenda count
         Integer expectedTotalEntryAndAddendaCount = control.getEntryAddendaCount();
@@ -33,13 +51,13 @@ public class AchBatchDataValidator {
         Double expectedTotalDebitAmount = control.getTotalDebitAmount();
         // totalCreditAmount
         Double expectedTotalCreditAmount = control.getTotalCreditAmount();
-        // serviceClassCode -> credit?
 
         int actualEntryAndAddendaCount = 0;
         double actualTotalDebitAmount = 0.0;
         double actualTotalCreditAmount = 0.0;
 
         for (AchEntryDetailRecord ed : batch.getEntryDetails()) {
+            context.setCurrentEntryDetail(ed);
             ++actualEntryAndAddendaCount;
             if (!CollectionUtils.isEmpty(ed.getAddenda())) {
                 actualEntryAndAddendaCount += ed.getAddenda().size();
@@ -47,39 +65,69 @@ public class AchBatchDataValidator {
             switch (ed.getTransactionCode()) {
             case CONSUMER_CREDIT_DEPOSIT:
             case CORPORATE_CREDIT_DEPOSIT: {
-                actualTotalCreditAmount += ed.getAmount();
+                actualTotalCreditAmount = Double.sum(actualTotalCreditAmount, ed.getAmount());
                 break;
             }
             case CONSUMER_DEBIT_PAYMENT:
             case CORPORATE_DEBIT_PAYMENT: {
-                actualTotalDebitAmount += ed.getAmount();
+                actualTotalDebitAmount += Double.sum(actualTotalDebitAmount, ed.getAmount());
                 break;
             }
             }
         }
-        
-        if(!expectedTotalCreditAmount.equals(Double.valueOf(actualTotalCreditAmount))) {
-            
+        context.resetCurrentEntryDetail();
+        if (!expectedTotalCreditAmount.equals(Double.valueOf(actualTotalCreditAmount))) {
+            LOG.error("");
+            LOG.error(context.toString());
         }
-        if(!expectedTotalDebitAmount.equals(Double.valueOf(actualTotalDebitAmount))) {
-            
+        if (!expectedTotalDebitAmount.equals(Double.valueOf(actualTotalDebitAmount))) {
+            LOG.error("");
+            LOG.error(context.toString());
         }
-        if(!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            
+        if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
+            LOG.error("");
+            LOG.error(context.toString());
         }
     }
-    // For Payroll/Direct Deposits
-    // should use the 'PPD' standard entry class code (SEC code) and, as with all
-    // ACH batches, an informative company entry description should be included
 
-//    @Override
-//    public boolean supports(Class<?> clazz) {
-//        return AchBatch.class.isAssignableFrom(clazz);
-//    }
+    /**
+     * Batch control total “sums up all entries' count and dollar amount. It also
+     * includes a hash total (i.e., checksum) to ensure validity of the batch.”
+     *
+     * @param batch
+     * @param control
+     */
+    private void validateEntryHash(final AchBatch batch, final AchFileValidationContext context) {
+        context.setCurrentValidationStep(ValidationStep.BATCH_ENTRY_HASH);
+        AchBatchControlRecord control = batch.getControlRecord();
+        Integer expectedEntryHash = control.getEntryHash();
+        int actualEntryHash = 0;
+        for (AchEntryDetailRecord ed : batch.getEntryDetails()) {
+            context.setCurrentEntryDetail(ed);
+            actualEntryHash += Integer.parseInt(ed.getReceivingDFIIdentification());
+        }
+        context.resetCurrentEntryDetail();
+        if (!expectedEntryHash.equals(Integer.valueOf(actualEntryHash))) {
+            LOG.error("");
+            LOG.error(context.toString());
+        }
+    }
 
-//    incorrect account details, or closed accounts. You should handle ACH returns and error notifications from the bank by parsing any return files, logging the issues, and notifying HR or the employees.
-//
-//            Implement retries or alternative payment methods (e.g., paper checks) for failed transactions.
-//            Log detailed error messages for easy reconciliation.
+    /**
+     * For Payroll/Direct Deposits should use the 'PPD' standard entry class code
+     * (SEC code)
+     * 
+     * @param batch
+     * @param context
+     */
+    private void validateStandardEntryClassCode(final AchBatch batch, final AchFileValidationContext context) {
+        context.setCurrentValidationStep(ValidationStep.BATCH_SEC_CODE);
+        AchBatchHeaderRecord header = batch.getHeaderRecord();
+
+        if (!StandardEntryClassCode.PPD.equals(header.getStandardEntryClassCode())) {
+            LOG.error(String.format("Incorrect Standard Entry Class Code %s", header.getStandardEntryClassCode().toString()));
+            LOG.error(context.toString());
+        }
+    }
 
 }

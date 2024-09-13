@@ -1,13 +1,15 @@
 package com.khs.payroll.ach.file.validator;
 
-import java.util.Collections;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
+import com.khs.payroll.ach.file.validator.constant.ValidationStep;
+import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
 
 public class AchEntryDetailDataValidator {
-
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private static final Integer HAS_ADDENDUM_INDICATOR = Integer.valueOf(1);
 
     /**
@@ -15,22 +17,16 @@ public class AchEntryDetailDataValidator {
      * 
      * @param payment
      */
-    public void validate(final AchEntryDetailRecord entryDetail) {
-
+    public void validate(final AchEntryDetailRecord entryDetail, final AchFileValidationContext context) {
+        context.setCurrentValidationStep(ValidationStep.ENTRY_DETAIL_ADDENDUM_INDICATOR);
+        context.setCurrentEntryDetail(entryDetail);
         if (HAS_ADDENDUM_INDICATOR.equals(entryDetail.getAddendaRecordIndicator())) {
             if (CollectionUtils.isEmpty(entryDetail.getAddenda())) {
-                
+                LOG.error("");
+                LOG.error(context.toString());
             }
         }
-
-        // validate file header and control are present
-
-        // validate a batch is present with header and controller
-        // validate an entry detail is present
-
-        // validate required properties are present... maybe add as annotation to class?
-        // validate numbers and sums
-
+        context.resetCurrentEntryDetail();
     }
 
 }
