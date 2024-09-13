@@ -1,8 +1,8 @@
 package com.khs.payroll.ach.file.parser;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +25,7 @@ import com.khs.payroll.constant.TransactionCode;
 
 public class AchFileLineParser {
 
-    private DateFormat dateFormat = new SimpleDateFormat("YYMMDD");
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("YYMMDD");
     // Time format HHMM 24 Hour
 
     public AchFileHeaderRecord parseFileHeader(final String line) {
@@ -59,8 +59,7 @@ public class AchFileLineParser {
                 EntryDetailFixedWidth.TRANSACTION_CODE.getEnd());
         Optional<TransactionCode> transactionCodeOpt = TransactionCode.findByCode(transactionCodeString);
         if (transactionCodeOpt.isEmpty()) {
-            throw new ParseException(String.format("Unknown Transaction code %s", transactionCodeString),
-                    BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart());
+            throw new ParseException(String.format("Unknown Transaction code %s", transactionCodeString), BatchHeaderFixedWidth.SERVICE_CLASS_CODE.getStart());
         }
         entryDetail.setTransactionCode(transactionCodeOpt.get());
         entryDetail.setReceivingDFIIdentification(cleanStringData(line, EntryDetailFixedWidth.RECEIVING_DFI_IDENTIFICATION.getStart(),
@@ -155,13 +154,13 @@ public class AchFileLineParser {
         batchHeader.setCompanyDescriptiveDate(
                 cleanStringData(line, BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getStart(), BatchHeaderFixedWidth.COMPANY_DESCRIPTIVE_DATE.getEnd()));
         // check date format
-        batchHeader.setEffectiveEntryDate(dateFormat
-                .parse(cleanStringData(line, BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd())));
+        batchHeader.setEffectiveEntryDate(LocalDate.parse(
+                cleanStringData(line, BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getStart(), BatchHeaderFixedWidth.EFFECTIVE_ENTRY_DATE.getEnd()), dateFormat));
 
         String settlementDateString = cleanStringData(line, BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getStart(),
                 BatchHeaderFixedWidth.SETTLEMENT_DATE_JULIAN.getEnd());
         if (StringUtils.isNotBlank(settlementDateString)) {
-            batchHeader.setSettlementDate(dateFormat.parse(settlementDateString));
+            batchHeader.setSettlementDate(LocalDate.parse(settlementDateString, dateFormat));
         }
         batchHeader.setOriginatorStatusCode(
                 cleanStringData(line, BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getStart(), BatchHeaderFixedWidth.ORIGINATOR_STATUS_CODE.getEnd()));

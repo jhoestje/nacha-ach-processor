@@ -15,7 +15,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class AchFileValidationContext {
-//    @Setter(AccessLevel.NONE)
     private final String fileName;
     private AchBatch currentBatch;
     private AchEntryDetailRecord currentEntryDetail;

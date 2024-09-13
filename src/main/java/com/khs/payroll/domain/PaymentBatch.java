@@ -1,6 +1,6 @@
 package com.khs.payroll.domain;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -13,17 +13,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Document("dailyPaymentBatches")
-public class DailyPaymentBatch {
+@Document("paymentBatches")
+public class PaymentBatch {
     
     @Id
     private String id;
     @CreatedDate
-    private Instant createdDate; 
+    private LocalDate createdDate; 
     @LastModifiedDate
-    private Instant lastModifiedDate;
+    private LocalDate lastModifiedDate;
     // When to process
-    private Instant batchDate;
+    private LocalDate batchDate;
     private String account;
     private PaymentBatchState batchState;
     List<PayrollPayment> payments;

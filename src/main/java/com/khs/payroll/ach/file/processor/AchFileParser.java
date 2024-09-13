@@ -22,27 +22,24 @@ import com.khs.payroll.ach.file.record.AchPayment;
 import com.khs.payroll.constant.AchRecordType;
 import com.khs.payroll.domain.AchFileLog;
 import com.khs.payroll.repository.AchFileLogRepository;
-import com.khs.payroll.repository.AchPaymentRepository;
 
 @Component
-public class AchFileProcessor {
+public class AchFileParser {
 
     private Logger LOG = LoggerFactory.getLogger(getClass());
 
     private AchFileLogRepository logRepository;
-    private AchPaymentRepository paymentRepository;
     private AchFileLineParser lineParser = new AchFileLineParser();
 
     // ACH files need to be a multiple of 10 lines long are lines are padded with
     // all 9s
     private String paddingRecordCharacters = "99999";
 
-    public AchFileProcessor(final AchFileLogRepository logRepository, final AchPaymentRepository paymentRepository) {
+    public AchFileParser(final AchFileLogRepository logRepository) {
         this.logRepository = logRepository;
-        this.paymentRepository = paymentRepository;
     }
 
-    public AchPayment process(final File achFile) throws Exception {
+    public AchPayment parse(final File achFile) throws Exception {
         AchFileLog request = new AchFileLog();
         request.setFilename(achFile.getName());
         logRepository.save(request);
@@ -93,8 +90,6 @@ public class AchFileProcessor {
                     // fail file with details
                 }
             }
-         // validate and save
-            //paymentRepository.save(payments);
             LOG.info(String.format("Finished parsing ACH file:  %s:", achFile.getName()));
             return payments;
         } catch (Exception e) {
