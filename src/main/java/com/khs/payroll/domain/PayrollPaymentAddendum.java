@@ -1,6 +1,6 @@
 package com.khs.payroll.domain;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -17,9 +17,9 @@ public class PayrollPaymentAddendum {
     @Id
     private String id;
     @CreatedDate
-    private LocalDate createdDate; 
+    private Date createdDate; 
     @LastModifiedDate
-    private LocalDate lastModifiedDate;
+    private Date lastModifiedDate;
     private String paymentRelatedInfo;
     private Integer addendaSequenceNumber;
     private Integer entryDetailSequenceNumber;

@@ -1,6 +1,6 @@
 package com.khs.payroll.domain;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -20,7 +20,7 @@ public class AchFileLog {
     private String id;
     private String filename;
     @CreatedDate
-    private LocalDate createdDate;
+    private Date createdDate;
     @LastModifiedDate
-    private LocalDate lastModifiedDate;
+    private Date lastModifiedDate;
 }

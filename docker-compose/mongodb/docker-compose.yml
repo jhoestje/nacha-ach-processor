@@ -10,5 +10,6 @@ services:
     volumes:
       - ./data:/data/db
       - ./mongod.conf:/etc/mongod.conf
-      - ./replica-init.js:/docker-entrypoint-initdb.d/replica-init.js:ro
+      # - ./replica-init.js:/docker-entrypoint-initdb.d/replica-init.js:ro
+      - ./scripts:/docker-entrypoint-initdb.d:ro
     command: ["--bind_ip_all", "--replSet", "rs0"]

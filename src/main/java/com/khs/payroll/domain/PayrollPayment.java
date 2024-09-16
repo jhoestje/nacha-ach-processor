@@ -1,6 +1,7 @@
 package com.khs.payroll.domain;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -23,9 +24,9 @@ public class PayrollPayment {
     @Id
     private String id;
     @CreatedDate
-    private LocalDate createdDate; 
+    private Date createdDate; 
     @LastModifiedDate
-    private LocalDate lastModifiedDate;
+    private Date lastModifiedDate;
     private TransactionCode transactionCode;        // Identifies the type of transaction (e.g., credit, debit)
     private String receivingDFIIdentification;      // First 8 digits of the receiving bank's routing number
     private Integer checkDigit;                     // Last digit of the routing number

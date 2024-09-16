@@ -2,6 +2,7 @@ package com.khs.payroll.domain;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -23,12 +24,13 @@ public class PaymentBatch {
     @Id
     private String id;
     @CreatedDate
-    private LocalDate createdDate; 
+    private Date createdDate; 
     @LastModifiedDate
-    private LocalDate lastModifiedDate;
+    private Date lastModifiedDate;
     // When to process
     private LocalDate effectiveBatchDate;
     private String originatingDFIIdentification;
+    @DBRef
     private PaymentBatchState batchState;
     @DBRef
     List<PayrollPayment> payments;
