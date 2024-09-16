@@ -45,12 +45,15 @@ public class PaymentConversion {
             payment.setReceivingName(ed.getReceivingName());
             payment.setDiscretionaryData(ed.getDiscretionaryData());
             payment.setTraceNumber(ed.getTraceNumber());
-            // @formatter:off
-            List<PayrollPaymentAddendum> paymentAddendas = ed.getAddenda().stream()
-                    .map(addendum -> convertAddendum(addendum))
-                    .collect(Collectors.toList());
-            // @formatter:on
-            payment.setAddumda(paymentAddendas);
+            if (ed.getAddenda() != null) {
+             // @formatter:off
+                List<PayrollPaymentAddendum> paymentAddendas = ed.getAddenda().stream()
+                        .map(addendum -> convertAddendum(addendum))
+                        .collect(Collectors.toList());
+                // @formatter:on
+                payment.setAddumda(paymentAddendas);
+            }
+
             payments.add(payment);
         }
     }

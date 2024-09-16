@@ -1,33 +1,55 @@
 package com.khs.payroll.processor;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.khs.payroll.domain.PaymentBatch;
+import com.khs.payroll.domain.PaymentBatchState;
 import com.khs.payroll.domain.PayrollPayment;
+import com.khs.payroll.repository.PaymentBatchRepository;
+import com.khs.payroll.repository.PayrollPaymentRepository;
 
 /**
  * Batch incoming payments for transactional processing later.
  */
 @Component
 public class BatchPaymentsProcessor {
-    
-    //TODO:  add database batch lookup for add payments if it exists already
+
+    private PaymentBatchRepository batchRepository;
+    private PayrollPaymentRepository paymentRepository;
+
+    public BatchPaymentsProcessor(final PaymentBatchRepository batchRepository, final PayrollPaymentRepository paymentRepository) {
+        this.batchRepository = batchRepository;
+        this.paymentRepository = paymentRepository;
+    }
+
+    /**
+     * Add the payment to batches for processing on the payment effective date.
+     * 
+     * @param payments
+     */
     public void batchPayments(final List<PayrollPayment> payments) {
         // Group by originatingDFIIdentification + payment date
-        Map<String, Map<LocalDate, List<PayrollPayment>>> paymentBatches = new HashMap<>();
+//        Map<String, Map<LocalDate, List<PayrollPayment>>> paymentBatches = new HashMap<>();
         for (PayrollPayment payment : payments) {
-            String dfiId = payment.getOriginatingDFIIdentification();
-            LocalDate paymentDate = payment.getEffectiveEntryDate();
+//            String dfiId = payment.getOriginatingDFIIdentification();
+//            LocalDate paymentDate = payment.getEffectiveEntryDate();
 
-            paymentBatches
-                .computeIfAbsent(dfiId, k -> new HashMap<>())
-                .computeIfAbsent(paymentDate, k -> new ArrayList<>())
-                .add(payment);
+//            paymentBatches.computeIfAbsent(dfiId, k -> new HashMap<>()).computeIfAbsent(paymentDate, k -> new ArrayList<>()).add(payment);
+
+            Optional<PaymentBatch> existingPaymentBatchOpt = batchRepository.findByEffectiveBatchDateAndOriginatingDFIIdentification(payment.getEffectiveEntryDate(),
+                    payment.getOriginatingDFIIdentification());
+
+            PaymentBatch existingPaymentBatch = existingPaymentBatchOpt.orElse(new PaymentBatch(payment.getEffectiveEntryDate(),
+                    payment.getOriginatingDFIIdentification(), new PaymentBatchState()));
+            // need duplicate payment checks
+            paymentRepository.save(payment);
+            existingPaymentBatch.addPayrollPayment(payment);
+            
+            batchRepository.save(existingPaymentBatch);
         }
+
     }
 }

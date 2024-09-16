@@ -1,12 +1,12 @@
 package com.khs.payroll.domain;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.khs.payroll.constant.ServiceClassCode;
@@ -28,7 +28,7 @@ public class PayrollPayment {
     private LocalDate lastModifiedDate;
     private TransactionCode transactionCode;        // Identifies the type of transaction (e.g., credit, debit)
     private String receivingDFIIdentification;      // First 8 digits of the receiving bank's routing number
-    private Integer checkDigit;                         // Last digit of the routing number
+    private Integer checkDigit;                     // Last digit of the routing number
     private String dfiAccountNumber;                // Account number at the receiving financial institution
     private Double amount;                          // Transaction amount in cents
     private String identificationNumber;            // Not required;  Identification number (optional, varies by application)
@@ -43,8 +43,9 @@ public class PayrollPayment {
     private StandardEntryClassCode standardEntryClassCode;    // Type of transactions (e.g., "PPD", "CCD", etc.)
     private String companyEntryDescription;         // Describes the purpose (e.g., "PAYROLL", "VENDOR PAY")
     private String companyDescriptiveDate;          // A date description like "JANUARY PAY"
-    private LocalDate effectiveEntryDate;                // Date when the transactions should be processed
+    private LocalDate effectiveEntryDate;           // Date when the transactions should be processed
     private String originatorStatusCode;            // Code identifying originator status (1 for ACH operator)
     private String originatingDFIIdentification;    // Routing number of the originating bank
+    @DBRef
     private List<PayrollPaymentAddendum> addumda;
 }

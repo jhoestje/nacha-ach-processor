@@ -25,7 +25,7 @@ import com.khs.payroll.constant.TransactionCode;
 
 public class AchFileLineParser {
 
-    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("YYMMDD");
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyMMdd");//YYMMDD
     // Time format HHMM 24 Hour
 
     public AchFileHeaderRecord parseFileHeader(final String line) {
