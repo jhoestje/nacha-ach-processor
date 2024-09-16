@@ -47,7 +47,7 @@ public class PaymentTransactionJob {
 
         // keep track of failed payments for reporting
         List<String> paymentErrors = new ArrayList<>();
-        
+        /////////////////////// need to seed data with user accounts and info
         for (PaymentBatch batch : batchesToday) {
             batch.setBatchState(stateProcessing);
             batchRepository.save(batch);
@@ -56,6 +56,7 @@ public class PaymentTransactionJob {
                 batch.setBatchState(stateComplete);
             } catch (Exception e) {
                 // Handle errors (e.g., log the error, retry, etc.)
+                paymentErrors.add("Bad batch");
                 PaymentBatchState stateFailed = batchState.findByState("PENDING");
                 batch.setBatchState(stateFailed);
                 batchRepository.save(batch);
