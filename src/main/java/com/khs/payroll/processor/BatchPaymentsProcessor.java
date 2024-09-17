@@ -49,9 +49,9 @@ public class BatchPaymentsProcessor {
             Optional<PaymentBatch> existingPaymentBatchOpt = batchRepository
                     .findByEffectiveBatchDateAndOriginatingDFIIdentification(payment.getEffectiveEntryDate(), payment.getOriginatingDFIIdentification());
 
-            PaymentBatch existingPaymentBatch = existingPaymentBatchOpt
-                    .orElse(new PaymentBatch(payment.getEffectiveEntryDate(), payment.getOriginatingDFIIdentification(), pendingState));
-            // TODO:  implement a duplicate payment check
+            PaymentBatch existingPaymentBatch = existingPaymentBatchOpt.orElse(new PaymentBatch(payment.getEffectiveEntryDate(),
+                    payment.getOriginatingDFIIdentification(), pendingState, payment.getCompanyIdentification()));
+            // TODO: implement a duplicate payment check
             if (!CollectionUtils.isEmpty(payment.getAddumda())) {
                 addumdaRepository.saveAll(payment.getAddumda());
             }

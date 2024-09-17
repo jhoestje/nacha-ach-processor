@@ -30,15 +30,17 @@ public class PaymentBatch {
     // When to process
     private LocalDate effectiveBatchDate;
     private String originatingDFIIdentification;
+    private String companyIdentification;
     @DBRef
     private PaymentBatchState batchState;
     @DBRef
     List<PayrollPayment> payments;
     
-    public PaymentBatch(final LocalDate effectiveEntryDate, final String originatingDFIIdentification, final PaymentBatchState batchState) {
+    public PaymentBatch(final LocalDate effectiveEntryDate, final String originatingDFIIdentification, final PaymentBatchState batchState, final String companyIdentification) {
         this.effectiveBatchDate = effectiveEntryDate;
         this.originatingDFIIdentification = originatingDFIIdentification;
         this.batchState = batchState;
+        this.companyIdentification = companyIdentification;
     }
 
     public PaymentBatch addPayrollPayment(final PayrollPayment payment) {
