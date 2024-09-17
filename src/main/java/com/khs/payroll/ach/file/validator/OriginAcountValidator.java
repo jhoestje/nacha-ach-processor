@@ -2,8 +2,11 @@ package com.khs.payroll.ach.file.validator;
 
 import org.springframework.stereotype.Component;
 
+import com.khs.payroll.domain.PaymentBatch;
+
 /**
- * Validate the details on the origin financial institution involved in the transaction.
+ * Validate the details on the origin financial institution involved in the
+ * transaction.
  * 
  * Helps ensure the ACH File was not edited.
  * 
@@ -12,8 +15,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class OriginAcountValidator {
 
-    public void validate(final String originatingDFIIdentification, final String companyIdentification) {
+    /**
+     * Add validation rules to limit mistakes and fraud. Ex: add an amount
+     * validation rule to compare possible authorized payroll amount.
+     * 
+     * @param originatingDFIIdentification
+     * @param companyIdentification
+     */
+    public void validate(final PaymentBatch batch) {
+        // batch.getOriginatingDFIIdentification()
         // validate the company identification with the NACHA network
+        // batch.getCompanyIdentification()
         return;
     }
 

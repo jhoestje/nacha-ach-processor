@@ -11,6 +11,7 @@ import com.khs.payroll.ach.file.record.AchBatch;
 import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.record.AchPayment;
+import com.khs.payroll.constant.PaymentState;
 import com.khs.payroll.domain.PayrollPayment;
 import com.khs.payroll.domain.PayrollPaymentAddendum;
 
@@ -28,6 +29,7 @@ public class PaymentConversion {
 
         for (AchEntryDetailRecord ed : achBatch.getEntryDetails()) {
             PayrollPayment payment = new PayrollPayment();
+            payment.setState(PaymentState.PENDING);
             payment.setCompanyName(batchHeader.getCompanyName());
             payment.setCompanyDiscretionaryData(batchHeader.getCompanyDiscretionaryData());
             payment.setCompanyIdentification(batchHeader.getCompanyIdentification());

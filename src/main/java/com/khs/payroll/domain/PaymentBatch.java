@@ -31,6 +31,7 @@ public class PaymentBatch {
     private LocalDate effectiveBatchDate;
     private String originatingDFIIdentification;
     private String companyIdentification;
+    private String companyName;
     @DBRef
     private PaymentBatchState batchState;
     @DBRef

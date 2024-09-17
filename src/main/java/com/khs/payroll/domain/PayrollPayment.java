@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.khs.payroll.constant.PaymentState;
 import com.khs.payroll.constant.ServiceClassCode;
 import com.khs.payroll.constant.StandardEntryClassCode;
 import com.khs.payroll.constant.TransactionCode;
@@ -49,4 +50,6 @@ public class PayrollPayment {
     private String originatingDFIIdentification;    // Routing number of the originating bank
     @DBRef
     private List<PayrollPaymentAddendum> addumda;
+    private PaymentState state;
+    private String stateReason;                     // Additional information for the state;  Usually for the FAILED state
 }

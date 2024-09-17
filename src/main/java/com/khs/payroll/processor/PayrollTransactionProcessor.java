@@ -8,12 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.khs.payroll.ach.file.validator.DestinationAcountValidator;
 import com.khs.payroll.ach.file.validator.OriginAcountValidator;
+import com.khs.payroll.constant.PaymentState;
 import com.khs.payroll.domain.PaymentBatch;
 import com.khs.payroll.domain.PaymentBatchState;
 import com.khs.payroll.domain.PayrollPayment;
+import com.khs.payroll.exception.InvalidAccountException;
 import com.khs.payroll.repository.PaymentBatchRepository;
 import com.khs.payroll.repository.PaymentBatchStateRepository;
+import com.khs.payroll.repository.PayrollPaymentRepository;
 
 //2. validation
 //Transaction validation: Verify that each payment detail (e.g., employee bank account number, routing number, amount) is valid.
@@ -35,13 +39,18 @@ public class PayrollTransactionProcessor {
     private Logger LOG = LoggerFactory.getLogger(getClass());
     private PaymentBatchRepository batchRepository;
     private PaymentBatchStateRepository batchStateRepository;
+    private PayrollPaymentRepository paymentRepository;
     private OriginAcountValidator originAcountValidator;
+    private DestinationAcountValidator destinationAcountValidator;
 
     public PayrollTransactionProcessor(final PaymentBatchRepository batchRepository, final PaymentBatchStateRepository batchStateRepository,
-            final OriginAcountValidator originAcountValidator) {
+            final PayrollPaymentRepository paymentRepository, final OriginAcountValidator originAcountValidator,
+            final DestinationAcountValidator destinationAcountValidator) {
         this.batchRepository = batchRepository;
         this.batchStateRepository = batchStateRepository;
+        this.paymentRepository = paymentRepository;
         this.originAcountValidator = originAcountValidator;
+        this.destinationAcountValidator = destinationAcountValidator;
     }
 
     public void process(final List<PaymentBatch> batches) {
@@ -52,7 +61,6 @@ public class PayrollTransactionProcessor {
 
         // keep track of failed payments for reporting
         List<String> paymentErrors = new ArrayList<>();
-        /////////////////////// need to seed data with user accounts and info
         for (PaymentBatch batch : batches) {
             LOG.info(String.format("Processing batch %s OriginatingDFI.", batch.getOriginatingDFIIdentification()));
             batch.setBatchState(stateProcessing);
@@ -70,10 +78,24 @@ public class PayrollTransactionProcessor {
     }
 
     private void processBatch(final PaymentBatch batch) {
-        // verify origin account
         try {
-            originAcountValidator.validate(batch.getOriginatingDFIIdentification(), batch.getCompanyIdentification());
-            batch.getPayments().stream().forEach(p -> transferFunds(p));
+            originAcountValidator.validate(batch);
+
+            for (PayrollPayment payment : batch.getPayments()) {
+                try {
+                    transferFunds(payment);
+                    payment.setState(PaymentState.PROCESSED);
+                } catch (InvalidAccountException iae) {
+                    payment.setState(PaymentState.FAILED);
+                    payment.setStateReason("Account Validation Error: " + iae.getMessage());
+                } catch (Exception e) {
+                    payment.setState(PaymentState.FAILED);
+                    payment.setStateReason("System Error: " + e.getMessage());
+                } finally {
+                    paymentRepository.save(payment);
+                }
+            }
+
         } catch (Exception e) {
             // fail batch
             // fail all payments
@@ -81,9 +103,9 @@ public class PayrollTransactionProcessor {
     }
 
     @Transactional
-    private void transferFunds(PayrollPayment payment) {
-        
+    private void transferFunds(final PayrollPayment payment) throws InvalidAccountException {
         LOG.info(String.format("Processing payment trace number %s.", payment.getTraceNumber()));
+        destinationAcountValidator.validate(payment);
         // Logic to transfer funds from the payroll account to the employee’s account
         // Call to internal/external banking APIs
     }

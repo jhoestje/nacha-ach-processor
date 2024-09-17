@@ -1,5 +1,7 @@
 package com.khs.payroll.ach.file.validator;
 
+import java.time.LocalDate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +35,7 @@ public class AchBatchDataValidator {
         validateStandardEntryClassCode(batch, context);
         validateAmounts(batch, context);
         validateEntryHash(batch, context);
+        validateEffectiveDate(batch, context);
         context.resetCurrentBatch();
     }
 
@@ -130,4 +133,16 @@ public class AchBatchDataValidator {
         }
     }
 
+    /**
+     * Just make sure the effective date is after "today" in this example.
+     * @param batch
+     * @param context
+     */
+    private void validateEffectiveDate(AchBatch batch, AchFileValidationContext context) {
+        context.setCurrentValidationStep(ValidationStep.BATCH_EFFECTIVE_DATE);
+        if(LocalDate.now().isAfter(batch.getHeaderRecord().getEffectiveEntryDate())) {
+            LOG.error(String.format("Incorrect batch effective date %s", batch.getHeaderRecord().getEffectiveEntryDate()));
+            LOG.error(context.toString());
+        }
+    }
 }
