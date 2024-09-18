@@ -57,6 +57,7 @@ public class IncomingPaymentFileProcessor {
             // done processing until scheduled payment
             achPayments.setState(AchFileState.PROCESSED);
             achRepository.save(achPayments);
+            LOG.info("Processed file " + achFile.getName());
         } catch (ConstraintViolationException cve) {
             StringBuilder sb = new StringBuilder();
             for (ConstraintViolation<?> violation : cve.getConstraintViolations()) {

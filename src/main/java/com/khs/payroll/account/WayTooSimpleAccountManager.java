@@ -16,18 +16,22 @@ public class WayTooSimpleAccountManager implements AccountManager {
 
     private AccountRepository accountRepository;
     
+    public WayTooSimpleAccountManager(final AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
+    
     @Transactional
     @Override
     public void applyFunds(PayrollPayment payment) throws Exception {
 
-        Account account = accountRepository.findByAccountNumber(payment.getReceivingDFIIdentification()).get();
+        Account account = accountRepository.findByAccountNumber(payment.getDfiAccountNumber()).get();
         if (TransactionCode.CONSUMER_DEBIT_PAYMENT.equals(payment.getTransactionCode())
                 || TransactionCode.CORPORATE_DEBIT_PAYMENT.equals(payment.getTransactionCode())) {
             // Debit the company account for the total payroll amount
             account.setAmount(account.getAmount().subtract(payment.getAmount()));
             
-        } else if (TransactionCode.CONSUMER_DEBIT_PAYMENT.equals(payment.getTransactionCode())
-                || TransactionCode.CORPORATE_DEBIT_PAYMENT.equals(payment.getTransactionCode())) {
+        } else if (TransactionCode.CONSUMER_CREDIT_DEPOSIT.equals(payment.getTransactionCode())
+                || TransactionCode.CORPORATE_CREDIT_DEPOSIT.equals(payment.getTransactionCode())) {
             // Credit the employee's account
             account.setAmount(account.getAmount().add(payment.getAmount()));
         } else {

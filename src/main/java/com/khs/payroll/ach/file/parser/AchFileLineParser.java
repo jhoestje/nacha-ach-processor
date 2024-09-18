@@ -195,7 +195,7 @@ public class AchFileLineParser {
 
     // numeric field must be unsigned, right-justified and pre-padded with zeros
     private BigDecimal cleanBigDecimal(final String line, final int start, final int end) {
-        return new BigDecimal(line.substring(start, end).trim());
+        return new BigDecimal(line.substring(start, end).trim()).divide(new BigDecimal(100));
     }
 
     // numeric field must be unsigned, right-justified and pre-padded with zeros

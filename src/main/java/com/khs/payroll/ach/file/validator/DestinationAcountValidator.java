@@ -39,21 +39,18 @@ public class DestinationAcountValidator {
         Optional<Account> accountOpt = accountRepository.findByAccountNumber(payment.getDfiAccountNumber());
 
         if (accountOpt.isEmpty()) {
-            throw new InvalidAccountException("ACH DFI account number % did not match an internal account");
+            throw new InvalidAccountException("ACH DFI account number did not match an internal account" + payment.getTraceNumber());
         }
         Account account = accountOpt.get();
         if (!StringUtils.equals(account.getAccountName(), payment.getReceivingName())) {
-            throw new InvalidAccountException("ACH account name did not match an internal account name");
-        }
-        if (!StringUtils.equals(account.getAccountId(), payment.getIdentificationNumber())) {
-            throw new InvalidAccountException("ACH Identification Number did not match an internal account Id");
+            throw new InvalidAccountException("ACH account name did not match an internal account name" + payment.getTraceNumber());
         }
         // Prenotifications Payment will have 0.00 for amount
         // does the account have enough money for the debit?
         if (TransactionCode.CONSUMER_DEBIT_PAYMENT.equals(payment.getTransactionCode())
                 || TransactionCode.CORPORATE_DEBIT_PAYMENT.equals(payment.getTransactionCode())) {
             if (0 > account.getAmount().compareTo(payment.getAmount())) {
-                throw new InvalidAccountException("Lack of funds for debit");
+                throw new InvalidAccountException("Lack of funds for debit" + payment.getTraceNumber());
             }
         }
     }

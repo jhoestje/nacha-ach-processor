@@ -63,7 +63,7 @@ public class BatchPaymentsProcessor {
             existingPaymentBatch.addPayrollPayment(payment);
 
             batchRepository.save(existingPaymentBatch);
-            LOG.info("Finished Batching payments");
+            LOG.info("Finished Batching payment " + payment.getTraceNumber());
         }
     }
 }
