@@ -6,8 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.khs.payroll.account.AccountManager;
 import com.khs.payroll.ach.file.validator.DestinationAcountValidator;
 import com.khs.payroll.ach.file.validator.OriginAcountValidator;
 import com.khs.payroll.constant.PaymentState;
@@ -42,15 +42,17 @@ public class PayrollTransactionProcessor {
     private PayrollPaymentRepository paymentRepository;
     private OriginAcountValidator originAcountValidator;
     private DestinationAcountValidator destinationAcountValidator;
+    private AccountManager accountManager;
 
     public PayrollTransactionProcessor(final PaymentBatchRepository batchRepository, final PaymentBatchStateRepository batchStateRepository,
             final PayrollPaymentRepository paymentRepository, final OriginAcountValidator originAcountValidator,
-            final DestinationAcountValidator destinationAcountValidator) {
+            final DestinationAcountValidator destinationAcountValidator, final AccountManager accountManager) {
         this.batchRepository = batchRepository;
         this.batchStateRepository = batchStateRepository;
         this.paymentRepository = paymentRepository;
         this.originAcountValidator = originAcountValidator;
         this.destinationAcountValidator = destinationAcountValidator;
+        this.accountManager = accountManager;
     }
 
     public void process(final List<PaymentBatch> batches) {
@@ -83,12 +85,17 @@ public class PayrollTransactionProcessor {
 
             for (PayrollPayment payment : batch.getPayments()) {
                 try {
-                    transferFunds(payment);
+                    LOG.info(String.format("Processing payment trace number %s.", payment.getTraceNumber()));
+                    destinationAcountValidator.validate(payment);
+                    accountManager.applyFunds(payment);
                     payment.setState(PaymentState.PROCESSED);
+                    LOG.info(String.format("Processed payment trace number %s.", payment.getTraceNumber()));
                 } catch (InvalidAccountException iae) {
+                    LOG.error("Payment failed, Account Validation Error", iae);
                     payment.setState(PaymentState.FAILED);
                     payment.setStateReason("Account Validation Error: " + iae.getMessage());
                 } catch (Exception e) {
+                    LOG.error("Payment failed, System Error", e);
                     payment.setState(PaymentState.FAILED);
                     payment.setStateReason("System Error: " + e.getMessage());
                 } finally {
@@ -97,16 +104,10 @@ public class PayrollTransactionProcessor {
             }
 
         } catch (Exception e) {
+            LOG.error("Batch failed, System Error", e);
             // fail batch
             // fail all payments
         }
     }
 
-    @Transactional
-    private void transferFunds(final PayrollPayment payment) throws InvalidAccountException {
-        LOG.info(String.format("Processing payment trace number %s.", payment.getTraceNumber()));
-        destinationAcountValidator.validate(payment);
-        // Logic to transfer funds from the payroll account to the employee’s account
-        // Call to internal/external banking APIs
-    }
 }

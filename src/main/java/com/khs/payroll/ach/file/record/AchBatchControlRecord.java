@@ -1,5 +1,7 @@
 package com.khs.payroll.ach.file.record;
 
+import java.math.BigDecimal;
+
 import com.khs.payroll.constant.ServiceClassCode;
 
 import jakarta.annotation.Nullable;
@@ -36,11 +38,11 @@ public class AchBatchControlRecord {
 
     @NotNull(message = "Total Debit Amount is mandatory")
     @DecimalMin(value = "0.0", inclusive = true, message = "Total Debit Amount must be zero or positive")
-    private Double totalDebitAmount; // Total debits in the batch (in cents)
+    private BigDecimal totalDebitAmount; // Total debits in the batch (in cents)
 
     @NotNull(message = "Total Credit Amount is mandatory")
     @DecimalMin(value = "0.0", inclusive = true, message = "Total Credit Amount must be zero or positive")
-    private Double totalCreditAmount; // Total credits in the batch (in cents)
+    private BigDecimal totalCreditAmount; // Total credits in the batch (in cents)
 
     @NotBlank(message = "Company Identification is mandatory")
     @Size(max = 10, message = "Company Identification must not exceed 10 characters")

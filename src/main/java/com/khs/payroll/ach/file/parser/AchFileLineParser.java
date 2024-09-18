@@ -1,5 +1,6 @@
 package com.khs.payroll.ach.file.parser;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +68,7 @@ public class AchFileLineParser {
         entryDetail.setCheckDigit(cleanInteger(line, EntryDetailFixedWidth.CHECK_DIGIT.getStart(), EntryDetailFixedWidth.CHECK_DIGIT.getEnd()));
         entryDetail.setDfiAccountNumber(
                 cleanStringData(line, EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getStart(), EntryDetailFixedWidth.DFI_ACCOUNT_NUMBER.getEnd()));
-        entryDetail.setAmount(cleanDouble(line, EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
+        entryDetail.setAmount(cleanBigDecimal(line, EntryDetailFixedWidth.AMOUNT.getStart(), EntryDetailFixedWidth.AMOUNT.getEnd()));
         entryDetail.setIdentificationNumber(cleanStringData(line, EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getStart(),
                 EntryDetailFixedWidth.INDIVIDUAL_IDENTIFICATION_NUMBER.getEnd()));
         entryDetail.setReceivingName(cleanStringData(line, EntryDetailFixedWidth.INDIVIDUAL_NAME.getStart(), EntryDetailFixedWidth.INDIVIDUAL_NAME.getEnd()));
@@ -108,9 +109,9 @@ public class AchFileLineParser {
                 cleanInteger(line, BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getStart(), BatchControlFixedWidth.ENTRY_ADDENDA_COUNT.getEnd()));
         batchControl.setEntryHash(cleanInteger(line, BatchControlFixedWidth.ENTRY_HASH.getStart(), BatchControlFixedWidth.ENTRY_HASH.getEnd()));
         batchControl.setTotalDebitAmount(
-                cleanDouble(line, BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getEnd()));
+                cleanBigDecimal(line, BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_DEBIT_AMOUNT.getEnd()));
         batchControl.setTotalCreditAmount(
-                cleanDouble(line, BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getEnd()));
+                cleanBigDecimal(line, BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getStart(), BatchControlFixedWidth.TOTAL_CREDIT_AMOUNT.getEnd()));
         batchControl.setCompanyIdentification(
                 cleanStringData(line, BatchControlFixedWidth.COMPANY_IDENTIFICATION.getStart(), BatchControlFixedWidth.COMPANY_IDENTIFICATION.getEnd()));
         batchControl.setMessageAuthenticationCode(cleanStringData(line, BatchControlFixedWidth.MESSAGE_AUTHENTICATION_CODE.getStart(),
@@ -179,9 +180,9 @@ public class AchFileLineParser {
         fileControl.setEntryAddendaCount(
                 cleanInteger(line, FileControlFixedWidth.ENTRY_ADDENDA_COUNT.getStart(), FileControlFixedWidth.ENTRY_ADDENDA_COUNT.getEnd()));
         fileControl.setEntryHash(cleanLong(line, FileControlFixedWidth.ENTRY_HASH.getStart(), FileControlFixedWidth.ENTRY_HASH.getEnd()));
-        fileControl.setTotalDebitAmount(cleanDouble(line, FileControlFixedWidth.TOTAL_DEBIT_ENTRY_DOLLAR_AMOUNT.getStart(),
+        fileControl.setTotalDebitAmount(cleanBigDecimal(line, FileControlFixedWidth.TOTAL_DEBIT_ENTRY_DOLLAR_AMOUNT.getStart(),
                 FileControlFixedWidth.TOTAL_DEBIT_ENTRY_DOLLAR_AMOUNT.getEnd()));
-        fileControl.setTotalCreditAmount(cleanDouble(line, FileControlFixedWidth.TOTAL_CREDIT_ENTRY_DOLLAR_AMOUNT.getStart(),
+        fileControl.setTotalCreditAmount(cleanBigDecimal(line, FileControlFixedWidth.TOTAL_CREDIT_ENTRY_DOLLAR_AMOUNT.getStart(),
                 FileControlFixedWidth.TOTAL_CREDIT_ENTRY_DOLLAR_AMOUNT.getEnd()));
 
         return fileControl;
@@ -193,8 +194,8 @@ public class AchFileLineParser {
     }
 
     // numeric field must be unsigned, right-justified and pre-padded with zeros
-    private double cleanDouble(final String line, final int start, final int end) {
-        return Double.parseDouble(line.substring(start, end).trim()) / 100;
+    private BigDecimal cleanBigDecimal(final String line, final int start, final int end) {
+        return new BigDecimal(line.substring(start, end).trim());
     }
 
     // numeric field must be unsigned, right-justified and pre-padded with zeros

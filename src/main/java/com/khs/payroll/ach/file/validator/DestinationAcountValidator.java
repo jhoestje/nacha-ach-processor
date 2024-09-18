@@ -50,9 +50,9 @@ public class DestinationAcountValidator {
         }
         // Prenotifications Payment will have 0.00 for amount
         // does the account have enough money for the debit?
-        if (TransactionCode.CONSUMER_DEBIT_PAYMENT.getDebitOrCredit().equals(payment.getTransactionCode().getDebitOrCredit())
-                || TransactionCode.CORPORATE_DEBIT_PAYMENT.getDebitOrCredit().equals(payment.getTransactionCode().getDebitOrCredit())) {
-            if (0 > Double.compare(account.getAmount(), payment.getAmount())) {
+        if (TransactionCode.CONSUMER_DEBIT_PAYMENT.equals(payment.getTransactionCode())
+                || TransactionCode.CORPORATE_DEBIT_PAYMENT.equals(payment.getTransactionCode())) {
+            if (0 > account.getAmount().compareTo(payment.getAmount())) {
                 throw new InvalidAccountException("Lack of funds for debit");
             }
         }

@@ -1,5 +1,6 @@
 package com.khs.payroll.ach.file.record;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class AchEntryDetailRecord {
     private String dfiAccountNumber;                // Account number at the receiving financial institution
     
     @NotNull(message = "Amount is required")
-    private Double amount;                          // Transaction amount in cents
+    private BigDecimal amount;                          // Transaction amount in cents
    
     @Nullable
     private String identificationNumber;            // Not required;  Identification number (optional, varies by application)

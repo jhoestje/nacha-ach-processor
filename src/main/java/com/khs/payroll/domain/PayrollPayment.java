@@ -1,5 +1,6 @@
 package com.khs.payroll.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public class PayrollPayment {
     private String receivingDFIIdentification;      // First 8 digits of the receiving bank's routing number
     private Integer checkDigit;                     // Last digit of the routing number
     private String dfiAccountNumber;                // Account number at the receiving financial institution
-    private Double amount;                          // Transaction amount in cents
+    private BigDecimal amount;                          // Transaction amount in cents
     private String identificationNumber;            // Not required;  Identification number (optional, varies by application)
     private String receivingName;                   // Name of the recipient (person or company)
     private String discretionaryData;               // For PPD and CCD entries;  Reserved for use by the originator (optional)

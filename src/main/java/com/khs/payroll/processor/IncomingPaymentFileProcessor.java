@@ -36,8 +36,8 @@ public class IncomingPaymentFileProcessor {
 
     public void process(final File achFile) {
         try {
+            LOG.info("Processing file " + achFile.getName());
             AchPayment achPayments = fileProcessor.parse(achFile);
-            LOG.info("finsihed parsing");
             AchFileValidationContext context = new AchFileValidationContext(achFile.getName());
             validator.validate(achPayments, context);
             // convert to domain objects

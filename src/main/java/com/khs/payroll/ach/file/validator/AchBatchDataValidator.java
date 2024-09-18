@@ -1,5 +1,6 @@
 package com.khs.payroll.ach.file.validator;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.slf4j.Logger;
@@ -51,13 +52,13 @@ public class AchBatchDataValidator {
         // entry+ addenda count
         Integer expectedTotalEntryAndAddendaCount = control.getEntryAddendaCount();
         // totalDebitAmount
-        Double expectedTotalDebitAmount = control.getTotalDebitAmount();
+        BigDecimal expectedTotalDebitAmount = control.getTotalDebitAmount();
         // totalCreditAmount
-        Double expectedTotalCreditAmount = control.getTotalCreditAmount();
+        BigDecimal expectedTotalCreditAmount = control.getTotalCreditAmount();
 
         int actualEntryAndAddendaCount = 0;
-        double actualTotalDebitAmount = 0.0;
-        double actualTotalCreditAmount = 0.0;
+        BigDecimal actualTotalDebitAmount = new BigDecimal(0.0);
+        BigDecimal actualTotalCreditAmount = new BigDecimal(0.0);
 
         for (AchEntryDetailRecord ed : batch.getEntryDetails()) {
             context.setCurrentEntryDetail(ed);
@@ -68,27 +69,30 @@ public class AchBatchDataValidator {
             switch (ed.getTransactionCode()) {
             case CONSUMER_CREDIT_DEPOSIT:
             case CORPORATE_CREDIT_DEPOSIT: {
-                actualTotalCreditAmount = Double.sum(actualTotalCreditAmount, ed.getAmount());
+                actualTotalCreditAmount = actualTotalCreditAmount.add(ed.getAmount());
                 break;
             }
             case CONSUMER_DEBIT_PAYMENT:
             case CORPORATE_DEBIT_PAYMENT: {
-                actualTotalDebitAmount += Double.sum(actualTotalDebitAmount, ed.getAmount());
+                actualTotalDebitAmount = actualTotalDebitAmount.add(ed.getAmount());
                 break;
             }
             }
         }
         context.resetCurrentEntryDetail();
-        if (!expectedTotalCreditAmount.equals(Double.valueOf(actualTotalCreditAmount))) {
-            LOG.error("");
+        if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
+            LOG.error(String.format("expectedTotalCreditAmount %s did not equal actualTotalCreditAmount %s", expectedTotalCreditAmount.toPlainString(),
+                    actualTotalCreditAmount.toPlainString()));
             LOG.error(context.toString());
         }
-        if (!expectedTotalDebitAmount.equals(Double.valueOf(actualTotalDebitAmount))) {
-            LOG.error("");
+        if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
+            LOG.error(String.format("expectedTotalDebitAmount %s did not equal actualTotalDebitAmount %s", expectedTotalDebitAmount.toPlainString(),
+                    actualTotalDebitAmount.toPlainString()));
             LOG.error(context.toString());
         }
         if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            LOG.error("");
+            LOG.error(String.format("expectedTotalEntryAndAddendaCount %d did not equal actualEntryAndAddendaCount %d", expectedTotalEntryAndAddendaCount,
+                    actualEntryAndAddendaCount));
             LOG.error(context.toString());
         }
     }
@@ -135,12 +139,13 @@ public class AchBatchDataValidator {
 
     /**
      * Just make sure the effective date is after "today" in this example.
+     * 
      * @param batch
      * @param context
      */
     private void validateEffectiveDate(AchBatch batch, AchFileValidationContext context) {
         context.setCurrentValidationStep(ValidationStep.BATCH_EFFECTIVE_DATE);
-        if(LocalDate.now().isAfter(batch.getHeaderRecord().getEffectiveEntryDate())) {
+        if (LocalDate.now().isAfter(batch.getHeaderRecord().getEffectiveEntryDate())) {
             LOG.error(String.format("Incorrect batch effective date %s", batch.getHeaderRecord().getEffectiveEntryDate()));
             LOG.error(context.toString());
         }

@@ -1,5 +1,6 @@
 package com.khs.payroll.ach.file.validator;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -84,30 +85,30 @@ public class AchDataValidator {
         // entry+ addenda count
         Integer expectedTotalEntryAndAddendaCount = control.getEntryAddendaCount();
         // totalDebitAmount
-        Double expectedTotalDebitAmount = control.getTotalDebitAmount();
+        BigDecimal expectedTotalDebitAmount = control.getTotalDebitAmount();
         // totalCreditAmount
-        Double expectedTotalCreditAmount = control.getTotalCreditAmount();
+        BigDecimal expectedTotalCreditAmount = control.getTotalCreditAmount();
 
         int actualEntryAndAddendaCount = 0;
-        double actualTotalDebitAmount = 0.0;
-        double actualTotalCreditAmount = 0.0;
+        BigDecimal actualTotalDebitAmount = new BigDecimal(0.0);
+        BigDecimal actualTotalCreditAmount = new BigDecimal(0.0);
 
         for (AchBatch ab : payment.getBatchRecords()) {
             context.setCurrentBatch(ab);
             AchBatchControlRecord batchControl = ab.getControlRecord();
 
             actualEntryAndAddendaCount += batchControl.getEntryAddendaCount();
-            actualTotalCreditAmount = Double.sum(actualTotalCreditAmount, batchControl.getTotalCreditAmount());
-            actualTotalDebitAmount += Double.sum(actualTotalDebitAmount, batchControl.getTotalDebitAmount());
+            actualTotalCreditAmount = actualTotalCreditAmount.add(batchControl.getTotalCreditAmount());
+            actualTotalDebitAmount = actualTotalDebitAmount.add(batchControl.getTotalDebitAmount());
         }
         context.resetCurrentBatch();
-        
-        if (!expectedTotalCreditAmount.equals(Double.valueOf(actualTotalCreditAmount))) {
+
+        if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
             LOG.error("");
             LOG.error(context.toString());
 
         }
-        if (!expectedTotalDebitAmount.equals(Double.valueOf(actualTotalDebitAmount))) {
+        if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
             LOG.error("");
             LOG.error(context.toString());
         }

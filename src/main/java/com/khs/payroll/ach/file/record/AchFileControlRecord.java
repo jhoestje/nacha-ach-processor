@@ -1,5 +1,7 @@
 package com.khs.payroll.ach.file.record;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,10 +38,10 @@ public class AchFileControlRecord {
     
     @NotNull(message = "Total Debit Amount is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Total Debit Amount must be zero or positive")
-    private Double totalDebitAmount; // Total debits in the file (in cents)
+    private BigDecimal totalDebitAmount; // Total debits in the file (in cents)
     
     @NotNull(message = "Total Credit Amount is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Total Credit Amount must be zero or positive")
-    private Double totalCreditAmount; // Total credits in the file (in cents)
+    private BigDecimal totalCreditAmount; // Total credits in the file (in cents)
     // Reserved 56-94
 }
