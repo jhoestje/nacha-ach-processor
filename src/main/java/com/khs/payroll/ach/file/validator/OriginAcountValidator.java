@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.khs.payroll.domain.PaymentBatch;
 
+import jakarta.validation.ValidationException;
+
 /**
  * Validate the details on the origin financial institution involved in the
  * transaction.
@@ -22,10 +24,12 @@ public class OriginAcountValidator {
      * @param originatingDFIIdentification
      * @param companyIdentification
      */
-    public void validate(final PaymentBatch batch) {
+    public void validate(final PaymentBatch batch) throws ValidationException {
         // batch.getOriginatingDFIIdentification()
         // validate the company identification with the NACHA network
         // batch.getCompanyIdentification()
+        
+        // for this example, just return for happy path
         return;
     }
 
