@@ -13,9 +13,11 @@ import com.khs.payroll.ach.file.record.AchFileControlRecord;
 import com.khs.payroll.ach.file.record.AchPayment;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
+import com.khs.payroll.exception.FileValidationException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 
 // For Payroll/Direct Deposits
@@ -30,8 +32,13 @@ import jakarta.validation.Validator;
 @Component
 public class AchDataValidator {
 
+    private static final String BATCH_RECORD_COUNT_MESSAGE = "Incorrect Batch Record Count %d";
     private Validator validator;
     private Logger LOG = LoggerFactory.getLogger(getClass());
+    private static final String TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE = "expectedTotalEntryAndAddendaCount %d did not equal actualEntryAndAddendaCount %d";
+    private static final String TOTAL_DEBIT_AMOUNT_MESSAGE = "expectedTotalDebitAmount %s did not equal actualTotalDebitAmount %s";
+    private static final String TOTAL_CREDIT_AMOUNT_MESSAGE = "expectedTotalCreditAmount %s did not equal actualTotalCreditAmount %s";
+    private static final String EXPECTED_BATCH_ENTRY_HASH_MESSAGE = "Incorrect expected File Entry Hash %s";
 
     public AchDataValidator(final Validator validator) {
         this.validator = validator;
@@ -44,15 +51,11 @@ public class AchDataValidator {
      * @param payment
      */
     public void validate(final AchPayment payment, final AchFileValidationContext context) {
+        LOG.info("Starting to validate " + context.getFileName());
         context.setCurrentValidationStep(ValidationStep.ANNOTATIONS);
         AchBatchDataValidator batchValidator = new AchBatchDataValidator();
         Set<ConstraintViolation<AchPayment>> violations = validator.validate(payment);
         if (!violations.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (ConstraintViolation<AchPayment> violation : violations) {
-                sb.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append("\n");
-            }
-            LOG.info(sb.toString());
             throw new ConstraintViolationException(violations);
         }
 
@@ -66,12 +69,14 @@ public class AchDataValidator {
         }
 
         if (!expectedBatchRecordCount.equals(Integer.valueOf(actualBatchRecordCount))) {
-            LOG.error("");
-            LOG.error(context.toString());
+            reportError(context, String.format(BATCH_RECORD_COUNT_MESSAGE, actualBatchRecordCount));
         }
 
         validateEntryHash(payment, context);
-
+        LOG.info(String.format("Finished validating %s with %d", context.getFileName(), context.getErrorMessages().size()));
+        if (!context.getErrorMessages().isEmpty()) {
+            throw new FileValidationException(context.getErrorMessages());
+        }
     }
 
     /**
@@ -104,17 +109,14 @@ public class AchDataValidator {
         context.resetCurrentBatch();
 
         if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
-            LOG.error("");
-            LOG.error(context.toString());
-
+            reportError(context,
+                    String.format(TOTAL_CREDIT_AMOUNT_MESSAGE, expectedTotalCreditAmount.toPlainString(), actualTotalCreditAmount.toPlainString()));
         }
         if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
-            LOG.error("");
-            LOG.error(context.toString());
+            reportError(context, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
         }
         if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            LOG.error("");
-            LOG.error(context.toString());
+            reportError(context, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
         }
     }
 
@@ -135,8 +137,13 @@ public class AchDataValidator {
         }
         context.resetCurrentBatch();
         if (!expectedEntryHash.equals(Long.valueOf(actualEntryHash))) {
-            LOG.error("");
-            LOG.error(context.toString());
+            reportError(context, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
         }
+    }
+
+    private void reportError(final AchFileValidationContext context, String message) {
+        context.addErrorMessage(new ValidationException(message));
+        LOG.error(message);
+        LOG.error(context.toString());
     }
 }

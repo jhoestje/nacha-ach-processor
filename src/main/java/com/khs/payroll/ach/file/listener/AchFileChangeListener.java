@@ -28,7 +28,11 @@ public class AchFileChangeListener implements FileChangeListener {
             for (ChangedFile cf : files.getFiles()) {
                 LOG.debug(cf.getType() + ":" + cf.getFile().getName());
                 if (Type.ADD.equals(cf.getType()))
-                    processor.process(cf.getFile());
+                    try {
+                        processor.process(cf.getFile());
+                    } catch (Exception e) {
+                        LOG.error("Processing incoming file failed", e);
+                    }
             }
         }
     }

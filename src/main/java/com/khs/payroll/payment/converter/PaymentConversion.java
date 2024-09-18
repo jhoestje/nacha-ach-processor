@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.khs.payroll.ach.file.record.AchAddendumRecord;
@@ -18,6 +20,8 @@ import com.khs.payroll.domain.PayrollPaymentAddendum;
 @Component
 public class PaymentConversion {
 
+    private Logger LOG = LoggerFactory.getLogger(getClass());
+    
     public List<PayrollPayment> convertToPayments(final AchPayment achPayment) {
         List<PayrollPayment> payments = new ArrayList<>();
         achPayment.getBatchRecords().stream().forEach(ab -> convertAchBatch(ab, payments));
@@ -25,6 +29,7 @@ public class PaymentConversion {
     }
 
     private void convertAchBatch(final AchBatch achBatch, final List<PayrollPayment> payments) {
+        LOG.info("Starting to convert");
         AchBatchHeaderRecord batchHeader = achBatch.getHeaderRecord();
 
         for (AchEntryDetailRecord ed : achBatch.getEntryDetails()) {
@@ -58,6 +63,7 @@ public class PaymentConversion {
 
             payments.add(payment);
         }
+        LOG.info("Finished converting");
     }
 
     private PayrollPaymentAddendum convertAddendum(final AchAddendumRecord achAddendum) {

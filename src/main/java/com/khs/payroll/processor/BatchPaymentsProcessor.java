@@ -3,6 +3,8 @@ package com.khs.payroll.processor;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -20,6 +22,7 @@ import com.khs.payroll.repository.PayrollPaymentRepository;
 @Component
 public class BatchPaymentsProcessor {
 
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private PaymentBatchRepository batchRepository;
     private PayrollPaymentRepository paymentRepository;
     private PaymentBatchStateRepository batchStateRepository;
@@ -38,10 +41,12 @@ public class BatchPaymentsProcessor {
      * 
      * Group by originatingDFIIdentification + payment effective date
      * 
+     * Will want to implement a duplicate payment rule
+     * 
      * @param payments
      */
     public void batchPayments(final List<PayrollPayment> payments) {
-
+        LOG.info("Starting to Batch payments");
         PaymentBatchState pendingState = batchStateRepository.findByState("PENDING");
 
         for (PayrollPayment payment : payments) {
@@ -51,7 +56,6 @@ public class BatchPaymentsProcessor {
 
             PaymentBatch existingPaymentBatch = existingPaymentBatchOpt.orElse(new PaymentBatch(payment.getEffectiveEntryDate(),
                     payment.getOriginatingDFIIdentification(), pendingState, payment.getCompanyIdentification()));
-            // TODO: implement a duplicate payment check
             if (!CollectionUtils.isEmpty(payment.getAddumda())) {
                 addumdaRepository.saveAll(payment.getAddumda());
             }
@@ -59,6 +63,7 @@ public class BatchPaymentsProcessor {
             existingPaymentBatch.addPayrollPayment(payment);
 
             batchRepository.save(existingPaymentBatch);
+            LOG.info("Finished Batching payments");
         }
     }
 }

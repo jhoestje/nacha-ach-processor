@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.khs.payroll.constant.AchFileState;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,6 +44,8 @@ public class AchPayment {
 
     @LastModifiedDate
     private Instant lastModifiedDate;
+    
+    private AchFileState state;
 
     public AchPayment addAchBatch(final AchBatch achBatch) {
         if (batchRecords == null) {

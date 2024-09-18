@@ -15,13 +15,18 @@ import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
 import com.khs.payroll.constant.StandardEntryClassCode;
 
+import jakarta.validation.ValidationException;
+
 // ACH batches, an informative company entry description should be included
 public class AchBatchDataValidator {
 
+    private static final String BATCH_EFFECTIVE_DATE_MESSAGE = "Incorrect batch effective date %s";
     private Logger LOG = LoggerFactory.getLogger(getClass());
-
-    public AchBatchDataValidator() {
-    }
+    private static final String STANDARD_ENTRY_CLASS_CODE_MESSAGE = "Incorrect Standard Entry Class Code %s";
+    private static final String EXPECTED_BATCH_ENTRY_HASH_MESSAGE = "Incorrect expected Batch Entry Hash %s";
+    private static final String TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE = "expectedTotalEntryAndAddendaCount %d did not equal actualEntryAndAddendaCount %d";
+    private static final String TOTAL_DEBIT_AMOUNT_MESSAGE = "expectedTotalDebitAmount %s did not equal actualTotalDebitAmount %s";
+    private static final String TOTAL_CREDIT_AMOUNT_MESSAGE = "expectedTotalCreditAmount %s did not equal actualTotalCreditAmount %s";
 
     /**
      * Batch control total “sums up all entries' count and dollar amount. It also
@@ -81,19 +86,14 @@ public class AchBatchDataValidator {
         }
         context.resetCurrentEntryDetail();
         if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
-            LOG.error(String.format("expectedTotalCreditAmount %s did not equal actualTotalCreditAmount %s", expectedTotalCreditAmount.toPlainString(),
-                    actualTotalCreditAmount.toPlainString()));
-            LOG.error(context.toString());
+            reportError(context,
+                    String.format(TOTAL_CREDIT_AMOUNT_MESSAGE, expectedTotalCreditAmount.toPlainString(), actualTotalCreditAmount.toPlainString()));
         }
         if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
-            LOG.error(String.format("expectedTotalDebitAmount %s did not equal actualTotalDebitAmount %s", expectedTotalDebitAmount.toPlainString(),
-                    actualTotalDebitAmount.toPlainString()));
-            LOG.error(context.toString());
+            reportError(context, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
         }
         if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            LOG.error(String.format("expectedTotalEntryAndAddendaCount %d did not equal actualEntryAndAddendaCount %d", expectedTotalEntryAndAddendaCount,
-                    actualEntryAndAddendaCount));
-            LOG.error(context.toString());
+            reportError(context, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
         }
     }
 
@@ -115,8 +115,7 @@ public class AchBatchDataValidator {
         }
         context.resetCurrentEntryDetail();
         if (!expectedEntryHash.equals(Integer.valueOf(actualEntryHash))) {
-            LOG.error("");
-            LOG.error(context.toString());
+            reportError(context, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
         }
     }
 
@@ -132,8 +131,7 @@ public class AchBatchDataValidator {
         AchBatchHeaderRecord header = batch.getHeaderRecord();
 
         if (!StandardEntryClassCode.PPD.equals(header.getStandardEntryClassCode())) {
-            LOG.error(String.format("Incorrect Standard Entry Class Code %s", header.getStandardEntryClassCode().toString()));
-            LOG.error(context.toString());
+            reportError(context, String.format(STANDARD_ENTRY_CLASS_CODE_MESSAGE, header.getStandardEntryClassCode().toString()));
         }
     }
 
@@ -146,8 +144,13 @@ public class AchBatchDataValidator {
     private void validateEffectiveDate(AchBatch batch, AchFileValidationContext context) {
         context.setCurrentValidationStep(ValidationStep.BATCH_EFFECTIVE_DATE);
         if (LocalDate.now().isAfter(batch.getHeaderRecord().getEffectiveEntryDate())) {
-            LOG.error(String.format("Incorrect batch effective date %s", batch.getHeaderRecord().getEffectiveEntryDate()));
-            LOG.error(context.toString());
+            reportError(context, String.format(BATCH_EFFECTIVE_DATE_MESSAGE, batch.getHeaderRecord().getEffectiveEntryDate()));
         }
+    }
+
+    private void reportError(final AchFileValidationContext context, String message) {
+        context.addErrorMessage(new ValidationException(message));
+        LOG.error(message);
+        LOG.error(context.toString());
     }
 }

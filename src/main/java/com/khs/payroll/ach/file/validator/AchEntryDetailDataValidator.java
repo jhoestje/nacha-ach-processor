@@ -8,9 +8,12 @@ import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
 
+import jakarta.validation.ValidationException;
+
 public class AchEntryDetailDataValidator {
     private Logger LOG = LoggerFactory.getLogger(getClass());
     private static final Integer HAS_ADDENDUM_INDICATOR = Integer.valueOf(1);
+    private static final String ERROR_MESSAGE = "Either incorrect Addunda Indicator or missing Addunda";
 
     /**
      * Validate addenda indicator along with the presence of the addendum.
@@ -22,7 +25,8 @@ public class AchEntryDetailDataValidator {
         context.setCurrentEntryDetail(entryDetail);
         if (HAS_ADDENDUM_INDICATOR.equals(entryDetail.getAddendaRecordIndicator())) {
             if (CollectionUtils.isEmpty(entryDetail.getAddenda())) {
-                LOG.error("");
+                context.addErrorMessage(new ValidationException(ERROR_MESSAGE));
+                LOG.error(ERROR_MESSAGE);
                 LOG.error(context.toString());
             }
         }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.khs.payroll.ach.file.processor.AchFileParser;
 
-@Component
+@Deprecated
 public class PaymentProcessor {
     private Logger LOG = LoggerFactory.getLogger(getClass());
     private AchFileParser fileProcessor;
