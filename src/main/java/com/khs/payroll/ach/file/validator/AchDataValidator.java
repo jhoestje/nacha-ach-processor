@@ -13,11 +13,12 @@ import com.khs.payroll.ach.file.record.AchFileControlRecord;
 import com.khs.payroll.ach.file.record.AchPayment;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
+import com.khs.payroll.constant.AchReturnCode;
+import com.khs.payroll.exception.AchFieldValidationException;
 import com.khs.payroll.exception.FileValidationException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 
 // For Payroll/Direct Deposits
@@ -69,7 +70,7 @@ public class AchDataValidator {
         }
 
         if (!expectedBatchRecordCount.equals(Integer.valueOf(actualBatchRecordCount))) {
-            reportError(context, String.format(BATCH_RECORD_COUNT_MESSAGE, actualBatchRecordCount));
+            reportError(context, AchReturnCode.FIELD_ERROR, String.format(BATCH_RECORD_COUNT_MESSAGE, actualBatchRecordCount));
         }
 
         validateEntryHash(payment, context);
@@ -109,14 +110,14 @@ public class AchDataValidator {
         context.resetCurrentBatch();
 
         if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
-            reportError(context,
+            reportError(context, AchReturnCode.FIELD_ERROR,
                     String.format(TOTAL_CREDIT_AMOUNT_MESSAGE, expectedTotalCreditAmount.toPlainString(), actualTotalCreditAmount.toPlainString()));
         }
         if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
-            reportError(context, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
+            reportError(context, AchReturnCode.FIELD_ERROR, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
         }
         if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            reportError(context, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
+            reportError(context, AchReturnCode.ADDENDA_ERROR, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
         }
     }
 
@@ -137,12 +138,13 @@ public class AchDataValidator {
         }
         context.resetCurrentBatch();
         if (!expectedEntryHash.equals(Long.valueOf(actualEntryHash))) {
-            reportError(context, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
+            reportError(context, AchReturnCode.FILE_RECORD_ERROR, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
         }
     }
 
-    private void reportError(final AchFileValidationContext context, String message) {
-        context.addErrorMessage(new ValidationException(message));
+    private void reportError(final AchFileValidationContext context, final AchReturnCode returnCode, final String message) {
+        do something?
+        context.addErrorMessage(new AchFieldValidationException(returnCode, message));
         LOG.error(message);
         LOG.error(context.toString());
     }

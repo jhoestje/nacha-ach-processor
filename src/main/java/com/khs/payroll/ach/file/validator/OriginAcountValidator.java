@@ -3,8 +3,7 @@ package com.khs.payroll.ach.file.validator;
 import org.springframework.stereotype.Component;
 
 import com.khs.payroll.domain.PaymentBatch;
-
-import jakarta.validation.ValidationException;
+import com.khs.payroll.exception.InvalidPaymentException;
 
 /**
  * Validate the details on the origin financial institution involved in the
@@ -24,7 +23,7 @@ public class OriginAcountValidator {
      * @param originatingDFIIdentification
      * @param companyIdentification
      */
-    public void validate(final PaymentBatch batch) throws ValidationException {
+    public void validate(final PaymentBatch batch) throws InvalidPaymentException {
         // batch.getOriginatingDFIIdentification()
         // validate the company identification with the NACHA network
         // batch.getCompanyIdentification()

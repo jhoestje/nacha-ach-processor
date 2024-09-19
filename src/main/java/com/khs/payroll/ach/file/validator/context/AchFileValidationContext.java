@@ -6,8 +6,8 @@ import java.util.List;
 import com.khs.payroll.ach.file.record.AchBatch;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
+import com.khs.payroll.exception.AchFieldValidationException;
 
-import jakarta.validation.ValidationException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +23,7 @@ public class AchFileValidationContext {
     private AchBatch currentBatch;
     private AchEntryDetailRecord currentEntryDetail;
     private ValidationStep currentValidationStep;
-    private List<ValidationException> errorMessages = new ArrayList<>();
+    private List<AchFieldValidationException> errorMessages = new ArrayList<>();
 
     public AchFileValidationContext(final String fileName) {
         this.fileName = fileName;
@@ -37,7 +37,7 @@ public class AchFileValidationContext {
         this.currentEntryDetail = null;
     }
     
-    public void addErrorMessage(final ValidationException exception) {
+    public void addErrorMessage(final AchFieldValidationException exception) {
         errorMessages.add(exception);
     }
 }

@@ -7,8 +7,8 @@ import org.springframework.util.CollectionUtils;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
-
-import jakarta.validation.ValidationException;
+import com.khs.payroll.constant.AchReturnCode;
+import com.khs.payroll.exception.AchFieldValidationException;
 
 public class AchEntryDetailDataValidator {
     private Logger LOG = LoggerFactory.getLogger(getClass());
@@ -25,7 +25,7 @@ public class AchEntryDetailDataValidator {
         context.setCurrentEntryDetail(entryDetail);
         if (HAS_ADDENDUM_INDICATOR.equals(entryDetail.getAddendaRecordIndicator())) {
             if (CollectionUtils.isEmpty(entryDetail.getAddenda())) {
-                context.addErrorMessage(new ValidationException(ERROR_MESSAGE));
+                context.addErrorMessage(new AchFieldValidationException(AchReturnCode.ADDENDA_ERROR, ERROR_MESSAGE));
                 LOG.error(ERROR_MESSAGE);
                 LOG.error(context.toString());
             }

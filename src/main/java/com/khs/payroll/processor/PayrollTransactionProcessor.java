@@ -15,12 +15,10 @@ import com.khs.payroll.constant.PaymentState;
 import com.khs.payroll.domain.PaymentBatch;
 import com.khs.payroll.domain.PaymentBatchState;
 import com.khs.payroll.domain.PayrollPayment;
-import com.khs.payroll.exception.InvalidAccountException;
+import com.khs.payroll.exception.InvalidPaymentException;
 import com.khs.payroll.repository.PaymentBatchRepository;
 import com.khs.payroll.repository.PaymentBatchStateRepository;
 import com.khs.payroll.repository.PayrollPaymentRepository;
-
-import jakarta.validation.ValidationException;
 
 @Component
 public class PayrollTransactionProcessor {
@@ -59,7 +57,7 @@ public class PayrollTransactionProcessor {
             try {
                 processBatch(batch);
                 batch.setBatchState(stateComplete);
-            } catch (ValidationException ve) {
+            } catch (InvalidPaymentException ve) {
                 LOG.error("Origin account validation failed, System Error", ve);
                 batch.setBatchState(stateFailed);
             } catch (Exception e) {
@@ -71,7 +69,7 @@ public class PayrollTransactionProcessor {
         }
     }
 
-    private void processBatch(final PaymentBatch batch) {
+    private void processBatch(final PaymentBatch batch) throws InvalidPaymentException {
         originAcountValidator.validate(batch);
 
         for (PayrollPayment payment : batch.getPayments()) {
@@ -80,9 +78,10 @@ public class PayrollTransactionProcessor {
                 destinationAcountValidator.validate(payment);
                 processPayment(payment);
                 LOG.info(String.format("Processed payment trace number %s.", payment.getTraceNumber()));
-            } catch (InvalidAccountException iae) {
+            } catch (InvalidPaymentException iae) {
                 LOG.error("Payment failed, Account Validation Error", iae);
                 payment.setState(PaymentState.FAILED);
+                payment.setReturnCode(iae.getReturnCode());
                 payment.setStateReason("Account Validation Error: " + iae.getMessage());
             } catch (Exception e) {
                 LOG.error("Payment failed, System Error", e);
@@ -96,9 +95,23 @@ public class PayrollTransactionProcessor {
     }
 
     @Transactional
-    private void processPayment(PayrollPayment payment) throws Exception {
+    private void processPayment(final PayrollPayment payment) throws Exception {
         accountManager.applyFunds(payment);
         payment.setState(PaymentState.PROCESSED);
     }
 
+    /**
+     * If the batch origin validation fails, mark the payments as failed.
+     *  
+     * @param batch
+     * @param exception
+     */
+    @Transactional
+    private void processFailedBatch(final PaymentBatch batch, final InvalidPaymentException exception) {
+        for(PayrollPayment p: batch.getPayments()) {
+            p.setState(PaymentState.FAILED);
+            p.setReturnCode(exception.getReturnCode());
+            paymentRepository.save(p);
+        }
+    }
 }

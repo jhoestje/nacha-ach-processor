@@ -13,9 +13,9 @@ import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.validator.constant.ValidationStep;
 import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
+import com.khs.payroll.constant.AchReturnCode;
 import com.khs.payroll.constant.StandardEntryClassCode;
-
-import jakarta.validation.ValidationException;
+import com.khs.payroll.exception.AchFieldValidationException;
 
 // ACH batches, an informative company entry description should be included
 public class AchBatchDataValidator {
@@ -86,14 +86,14 @@ public class AchBatchDataValidator {
         }
         context.resetCurrentEntryDetail();
         if (!expectedTotalCreditAmount.equals(actualTotalCreditAmount)) {
-            reportError(context,
+            reportError(context, AchReturnCode.FIELD_ERROR,
                     String.format(TOTAL_CREDIT_AMOUNT_MESSAGE, expectedTotalCreditAmount.toPlainString(), actualTotalCreditAmount.toPlainString()));
         }
         if (!expectedTotalDebitAmount.equals(actualTotalDebitAmount)) {
-            reportError(context, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
+            reportError(context, AchReturnCode.FIELD_ERROR, String.format(TOTAL_DEBIT_AMOUNT_MESSAGE, expectedTotalDebitAmount.toPlainString(), actualTotalDebitAmount.toPlainString()));
         }
         if (!expectedTotalEntryAndAddendaCount.equals(Integer.valueOf(actualEntryAndAddendaCount))) {
-            reportError(context, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
+            reportError(context,AchReturnCode.ADDENDA_ERROR, String.format(TOTAL_ENTRY_AND_ADDENDA_COUNT_MESSAGE, expectedTotalEntryAndAddendaCount, actualEntryAndAddendaCount));
         }
     }
 
@@ -115,7 +115,7 @@ public class AchBatchDataValidator {
         }
         context.resetCurrentEntryDetail();
         if (!expectedEntryHash.equals(Integer.valueOf(actualEntryHash))) {
-            reportError(context, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
+            reportError(context, AchReturnCode.FIELD_ERROR, String.format(EXPECTED_BATCH_ENTRY_HASH_MESSAGE, actualEntryHash));
         }
     }
 
@@ -131,7 +131,7 @@ public class AchBatchDataValidator {
         AchBatchHeaderRecord header = batch.getHeaderRecord();
 
         if (!StandardEntryClassCode.PPD.equals(header.getStandardEntryClassCode())) {
-            reportError(context, String.format(STANDARD_ENTRY_CLASS_CODE_MESSAGE, header.getStandardEntryClassCode().toString()));
+            reportError(context, AchReturnCode.FIELD_ERROR, String.format(STANDARD_ENTRY_CLASS_CODE_MESSAGE, header.getStandardEntryClassCode().toString()));
         }
     }
 
@@ -144,12 +144,13 @@ public class AchBatchDataValidator {
     private void validateEffectiveDate(AchBatch batch, AchFileValidationContext context) {
         context.setCurrentValidationStep(ValidationStep.BATCH_EFFECTIVE_DATE);
         if (LocalDate.now().isAfter(batch.getHeaderRecord().getEffectiveEntryDate())) {
-            reportError(context, String.format(BATCH_EFFECTIVE_DATE_MESSAGE, batch.getHeaderRecord().getEffectiveEntryDate()));
+            reportError(context, AchReturnCode.IMPROPER_ENTRY_DATE, String.format(BATCH_EFFECTIVE_DATE_MESSAGE, batch.getHeaderRecord().getEffectiveEntryDate()));
         }
     }
 
-    private void reportError(final AchFileValidationContext context, String message) {
-        context.addErrorMessage(new ValidationException(message));
+    private void reportError(final AchFileValidationContext context, final AchReturnCode returnCode, String message) {
+        do something?
+        context.addErrorMessage(new AchFieldValidationException(returnCode, message));
         LOG.error(message);
         LOG.error(context.toString());
     }

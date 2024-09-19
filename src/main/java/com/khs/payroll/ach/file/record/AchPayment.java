@@ -46,7 +46,7 @@ public class AchPayment {
     private Instant lastModifiedDate;
     
     private AchFileState state;
-
+    
     public AchPayment addAchBatch(final AchBatch achBatch) {
         if (batchRecords == null) {
             batchRecords = new ArrayList<>();

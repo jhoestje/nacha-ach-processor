@@ -9,9 +9,9 @@ import jakarta.validation.ValidationException;
 public class FileValidationException extends ValidationException {
 
     private static final long serialVersionUID = 7753436329050361738L;
-    private final List<ValidationException> exceptions;
+    private final List<AchFieldValidationException> exceptions;
 
-    public FileValidationException(String message, List<ValidationException> constraintViolations) {
+    public FileValidationException(String message, List<AchFieldValidationException> constraintViolations) {
         super(message);
 
         if (constraintViolations == null) {
@@ -21,15 +21,15 @@ public class FileValidationException extends ValidationException {
         }
     }
 
-    public FileValidationException(List<ValidationException> constraintViolations) {
+    public FileValidationException(List<AchFieldValidationException> constraintViolations) {
         this(constraintViolations != null ? toString(constraintViolations) : null, constraintViolations);
     }
 
-    public List<ValidationException> getValidationException() {
+    public List<AchFieldValidationException> getValidationException() {
         return exceptions;
     }
 
-    private static String toString(List<ValidationException> exceptions) {
+    private static String toString(List<AchFieldValidationException> exceptions) {
         return exceptions.stream().map(cv -> cv == null ? "null" : cv.getMessage()).collect(Collectors.joining(", "));
     }
 }
