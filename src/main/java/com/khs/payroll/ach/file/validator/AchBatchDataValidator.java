@@ -149,7 +149,6 @@ public class AchBatchDataValidator {
     }
 
     private void reportError(final AchFileValidationContext context, final AchReturnCode returnCode, String message) {
-        do something?
         context.addErrorMessage(new AchFieldValidationException(returnCode, message));
         LOG.error(message);
         LOG.error(context.toString());
