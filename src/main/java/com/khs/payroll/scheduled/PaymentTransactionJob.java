@@ -28,9 +28,9 @@ public class PaymentTransactionJob {
         this.transactionProcessor = transactionProcessor;
     }
 
-//    @Scheduled(cron = "0 0 2 * * ?")  // Runs every day at 2 AM
     // To trigger the scheduler to run every 10 seconds
-    @Scheduled(fixedRate = 10000)
+//    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 19 * * ?")  // Runs every day at 7 PM
     public void processScheduledPayments() {
         PaymentBatchState statePending = batchStateRepository.findByState("PENDING");
         

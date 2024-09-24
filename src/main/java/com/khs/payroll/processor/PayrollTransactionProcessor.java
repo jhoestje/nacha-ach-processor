@@ -71,33 +71,31 @@ public class PayrollTransactionProcessor {
 
     private void processBatch(final PaymentBatch batch) throws InvalidPaymentException {
         originAcountValidator.validate(batch);
-
-        for (PayrollPayment payment : batch.getPayments()) {
-            try {
-                LOG.info(String.format("Processing payment trace number %s.", payment.getTraceNumber()));
-                destinationAcountValidator.validate(payment);
-                processPayment(payment);
-                LOG.info(String.format("Processed payment trace number %s.", payment.getTraceNumber()));
-            } catch (InvalidPaymentException iae) {
-                LOG.error("Payment failed, Account Validation Error", iae);
-                payment.setState(PaymentState.FAILED);
-                payment.setReturnCode(iae.getReturnCode());
-                payment.setStateReason("Account Validation Error: " + iae.getMessage());
-            } catch (Exception e) {
-                LOG.error("Payment failed, System Error", e);
-                payment.setState(PaymentState.FAILED);
-                payment.setStateReason("System Error: " + e.getMessage());
-            } finally {
-                paymentRepository.save(payment);
-            }
-        }
+        
+        batch.getPayments().stream().forEach(p -> processPayment(p));
 
     }
 
     @Transactional
-    private void processPayment(final PayrollPayment payment) throws Exception {
-        accountManager.applyFunds(payment);
-        payment.setState(PaymentState.PROCESSED);
+    private void processPayment(final PayrollPayment payment) {
+        try {
+            LOG.info(String.format("Processing payment trace number %s.", payment.getTraceNumber()));
+            destinationAcountValidator.validate(payment);
+            accountManager.applyFunds(payment);
+            payment.setState(PaymentState.PROCESSED);
+            LOG.info(String.format("Processed payment trace number %s.", payment.getTraceNumber()));
+        } catch (InvalidPaymentException iae) {
+            LOG.error("Payment failed, Account Validation Error", iae);
+            payment.setState(PaymentState.FAILED);
+            payment.setReturnCode(iae.getReturnCode());
+            payment.setStateReason("Account Validation Error: " + iae.getMessage());
+        } catch (Exception e) {
+            LOG.error("Payment failed, System Error", e);
+            payment.setState(PaymentState.FAILED);
+            payment.setStateReason("System Error: " + e.getMessage());
+        } finally {
+            paymentRepository.save(payment);
+        }
     }
 
     /**
