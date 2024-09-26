@@ -3,7 +3,7 @@ package com.khs.payroll.ach.file.parser.fixedwidth;
 import lombok.Getter;
 
 /**
- * Extra processing details for an Entry Detail record.
+ * Extra processing details for an Addendum record.
  */
 @Getter
 public enum AddendumFixedWidth {

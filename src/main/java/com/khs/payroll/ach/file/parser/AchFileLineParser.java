@@ -20,13 +20,14 @@ import com.khs.payroll.ach.file.record.AchBatchHeaderRecord;
 import com.khs.payroll.ach.file.record.AchEntryDetailRecord;
 import com.khs.payroll.ach.file.record.AchFileControlRecord;
 import com.khs.payroll.ach.file.record.AchFileHeaderRecord;
+import com.khs.payroll.constant.AddendaTypeCode;
 import com.khs.payroll.constant.ServiceClassCode;
 import com.khs.payroll.constant.StandardEntryClassCode;
 import com.khs.payroll.constant.TransactionCode;
 
 public class AchFileLineParser {
 
-    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyMMdd");//YYMMDD
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyMMdd");// YYMMDD
     // Time format HHMM 24 Hour
 
     public AchFileHeaderRecord parseFileHeader(final String line) {
@@ -80,10 +81,17 @@ public class AchFileLineParser {
         return entryDetail;
     }
 
-    public AchAddendumRecord parseAddendum(final String line) {
+    public AchAddendumRecord parseAddendum(final String line) throws ParseException {
         AchAddendumRecord addendum = new AchAddendumRecord();
         addendum.setRecordTypeCode(cleanStringData(line, AddendumFixedWidth.RECORD_TYPE_CODE.getStart(), AddendumFixedWidth.RECORD_TYPE_CODE.getEnd()));
-        addendum.setAddendaTypeCode(cleanStringData(line, AddendumFixedWidth.ADDENDA_TYPE_CODE.getStart(), AddendumFixedWidth.ADDENDA_TYPE_CODE.getEnd()));
+
+        String typeCodeString = cleanStringData(line, AddendumFixedWidth.ADDENDA_TYPE_CODE.getStart(), AddendumFixedWidth.ADDENDA_TYPE_CODE.getEnd());
+        Optional<AddendaTypeCode> typeCodeOpt = AddendaTypeCode.getAddendaTypeCodeByCode(typeCodeString);
+        if (typeCodeOpt.isEmpty()) {
+            throw new ParseException(String.format("Unknown Addenda Type code %s", typeCodeString), AddendumFixedWidth.ADDENDA_TYPE_CODE.getStart());
+        }
+
+        addendum.setAddendaTypeCode(typeCodeOpt.get());
         addendum.setPaymentRelatedInfo(
                 cleanStringData(line, AddendumFixedWidth.PAYMENT_INFORMATION.getStart(), AddendumFixedWidth.PAYMENT_INFORMATION.getEnd()));
         addendum.setAddendaSequenceNumber(

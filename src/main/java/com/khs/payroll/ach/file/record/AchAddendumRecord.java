@@ -2,10 +2,11 @@ package com.khs.payroll.ach.file.record;
 
 import org.springframework.lang.Nullable;
 
+import com.khs.payroll.constant.AddendaTypeCode;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,9 +20,8 @@ public class AchAddendumRecord {
     @NotBlank(message = "Record Type Code is required")
     private String recordTypeCode; // Always "7"
     
-    @NotBlank(message = "Addenda Type Code is mandatory")
-    @Pattern(regexp = "05", message = "Addenda Type Code must be '05'")
-    private String addendaTypeCode; // Always "05"; Defines the type of addendum
+    @NotNull(message = "Addenda Type Code is mandatory")
+    private AddendaTypeCode addendaTypeCode;
     
     @Nullable
     @Size(max = 80, message = "Payment Related Information must not exceed 80 characters")

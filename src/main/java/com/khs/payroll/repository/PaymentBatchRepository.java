@@ -11,7 +11,7 @@ import com.khs.payroll.domain.PaymentBatchState;
 
 public interface PaymentBatchRepository extends MongoRepository<PaymentBatch, String> {
 
-    Optional<PaymentBatch> findByEffectiveBatchDateAndOriginatingDFIIdentification(LocalDate effectiveBatchDate, String originatingDFIIdentification);
+    Optional<PaymentBatch> findByEffectiveBatchDateAndOriginatingDFIIdentificationAndBatchState(LocalDate effectiveBatchDate, String originatingDFIIdentification, PaymentBatchState batchState);
 
     List<PaymentBatch> findByEffectiveBatchDateAndBatchState(LocalDate effectiveBatchDate, PaymentBatchState batchState);
 

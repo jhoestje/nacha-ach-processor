@@ -52,7 +52,7 @@ public class BatchPaymentsProcessor {
         for (PayrollPayment payment : payments) {
 
             Optional<PaymentBatch> existingPaymentBatchOpt = batchRepository
-                    .findByEffectiveBatchDateAndOriginatingDFIIdentification(payment.getEffectiveEntryDate(), payment.getOriginatingDFIIdentification());
+                    .findByEffectiveBatchDateAndOriginatingDFIIdentificationAndBatchState(payment.getEffectiveEntryDate(), payment.getOriginatingDFIIdentification(), pendingState);
 
             PaymentBatch existingPaymentBatch = existingPaymentBatchOpt.orElse(new PaymentBatch(payment.getEffectiveEntryDate(),
                     payment.getOriginatingDFIIdentification(), pendingState, payment.getCompanyIdentification()));

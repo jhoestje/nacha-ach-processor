@@ -27,9 +27,10 @@ public class PaymentBatch {
     private Date createdDate; 
     @LastModifiedDate
     private Date lastModifiedDate;
-    // When to process
+    // Batch grouping
     private LocalDate effectiveBatchDate;
     private String originatingDFIIdentification;
+    // additional information
     private String companyIdentification;
     private String companyName;
     @DBRef
