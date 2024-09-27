@@ -18,7 +18,7 @@ import com.khs.payroll.domain.PayrollPayment;
 import com.khs.payroll.domain.PayrollPaymentAddendum;
 
 @Component
-public class PaymentConversion {
+public class PaymentConverter {
 
     private Logger LOG = LoggerFactory.getLogger(getClass());
     
