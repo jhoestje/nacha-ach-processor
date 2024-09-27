@@ -14,7 +14,7 @@ import com.khs.payroll.ach.file.validator.context.AchFileValidationContext;
 import com.khs.payroll.constant.AchFileState;
 import com.khs.payroll.domain.PayrollPayment;
 import com.khs.payroll.exception.FileValidationException;
-import com.khs.payroll.payment.converter.PaymentConversion;
+import com.khs.payroll.payment.converter.PaymentConverter;
 import com.khs.payroll.repository.AchPaymentRepository;
 
 import jakarta.validation.ConstraintViolation;
@@ -30,11 +30,11 @@ public class IncomingPaymentFileProcessor {
     private Logger LOG = LoggerFactory.getLogger(getClass());
     private AchFileParser fileProcessor;
     private AchDataValidator validator;
-    private PaymentConversion conversion;
+    private PaymentConverter conversion;
     private BatchPaymentsProcessor batch;
     private AchPaymentRepository achRepository;
 
-    public IncomingPaymentFileProcessor(final AchFileParser fileProcessor, final AchDataValidator validator, final PaymentConversion conversion,
+    public IncomingPaymentFileProcessor(final AchFileParser fileProcessor, final AchDataValidator validator, final PaymentConverter conversion,
             final BatchPaymentsProcessor batch, final AchPaymentRepository achRepository) {
         this.fileProcessor = fileProcessor;
         this.validator = validator;
